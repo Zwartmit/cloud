@@ -1,0 +1,2946 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Capital: Inversión y Dashboard</title>
+    <!-- Carga de Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
+    <!-- Usando Inter de Google Fonts para un look limpio y moderno -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons para iconos limpios --><script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* --- ESTILOS PROFESIONALES Y DASHBOARD (Modo Nocturno Refinado) --- */
+        :root {
+            /* Variables de color base (Modo Nocturno) */
+            --color-primary: #0A0A18; /* Azul Oscuro Profundo / Fondo base */
+            --color-secondary: #1F2937; /* Gris Oscuro Suave / Cards (border-b-4) */
+            --color-accent: #3B82F6; /* Azul Corporativo / Acento principal (Más sobrio) */
+            --color-profit: #10B981; /* Verde Esmeralda / Ganancia (Más corporativo) */
+            --color-text: #F9FAFB; /* Blanco puro para contraste */
+            --color-subtext: #9CA3AF; /* Gris de soporte */
+            --color-danger: #EF4444; /* Rojo */
+            --color-admin: #FBBF24; /* Amarillo Ámbar para Admin */
+            --color-super-admin: #F97316; /* Naranja para Super Admin Tasks */
+        }
+        
+        /* 1. ESTILO PARA EL CANVAS DE FONDO */
+        #background-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Asegura que esté detrás de todo */
+        }
+
+        /* 2. AJUSTE DEL BODY */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: transparent; 
+            color: var(--color-text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative; 
+            z-index: 0; 
+        }
+        
+        /* Dashboard/General Cards: Diseño de Elevación Refinado */
+        .card { 
+            background-color: #111827; /* Fondo Card: Gris muy oscuro */
+            border: 1px solid #374151; /* Borde sutil */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); 
+            border-radius: 12px; 
+            transition: all 0.2s ease-in-out; 
+        }
+        .card:hover { 
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6); 
+            border-color: #4B5563; /* Borde más claro en hover */
+        }
+        .text-btc { color: #F7931A; }
+        .modal { background-color: rgba(10, 10, 24, 0.98); } /* Modal más oscuro */
+        .sparkline { height: 60px; width: 100%; opacity: 0.5; filter: drop-shadow(0 0 3px var(--color-accent)); }
+        .sidebar { background-color: #0A0A18; border-color: #1F2937; } /* Sidebar igual al fondo principal */
+        
+        /* Links de Navegación */
+        .nav-link { 
+            color: var(--color-subtext); 
+            font-weight: 500; 
+        }
+        .nav-link.tasks-active { background-color: var(--color-danger); color: white; }
+        .nav-link.super-tasks-active { background-color: var(--color-super-admin); color: white; }
+        .nav-link.active:not(.tasks-active):not(.super-tasks-active) { 
+            background-color: var(--color-accent); 
+            color: white; 
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        }
+        .nav-link:not(.active):hover { background-color: #1F2937; color: #F8FAFC; }
+        
+        /* Datos y Métricas: Enfasis en la Negrita (Black) */
+        .data-metric { font-weight: 900; letter-spacing: -0.05em; }
+        .modal input, .modal select { background-color: #1F2937; border-color: #374151; color: var(--color-text); }
+        .card-small:hover { transform: none; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); } /* Eliminando el translateY para un look más serio */
+        
+        /* Insignia GOLD */
+        .gold-premium-badge { 
+            background-color: #111827;
+            color: var(--color-admin); 
+            font-weight: 600; 
+            border: 1px solid var(--color-admin); 
+            padding: 4px 10px; 
+            border-radius: 8px; 
+        }
+        
+        /* Estilo para el botón de Clase */
+        .class-button {
+            background-color: #111827; 
+            color: var(--color-admin); 
+            border: 1px solid var(--color-admin); 
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .class-button:hover {
+            background-color: #1F2937;
+            border-color: var(--color-accent);
+        }
+        
+        .transaction-table thead { background-color: #1F2937; }
+        .transaction-table tbody tr:hover { background-color: #1F2937; }
+        
+        /* Estilos de Insignias de Tareas */
+        .task-count-badge {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background-color: var(--color-danger);
+            color: white;
+            font-size: 0.6rem;
+            font-weight: bold;
+            line-height: 1;
+            padding: 2px 5px;
+            border-radius: 9999px;
+            min-width: 18px;
+            text-align: center;
+        }
+        .super-task-count-badge { background-color: var(--color-super-admin); }
+        
+        /* Tarjeta de Balance Principal: Acento en el fondo */
+        .main-balance-card {
+            background-color: #111827;
+            border: 2px solid #374151;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+        }
+        
+        /* Estilos específicos para la vista de Clases */
+        .class-card {
+            /* Nuevo estilo: Mínimo y Moderno */
+            background-color: #111827;
+            border: 1px solid #374151;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .class-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.7);
+        }
+        .class-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(16, 185, 129, 0.02) 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .class-card:hover::before {
+            opacity: 1;
+        }
+
+        .class-current {
+            border: 2px solid var(--color-profit);
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.4);
+            background-color: #151F2D; /* Ligeramente más claro para destacar */
+        }
+        /* Ajuste de color para la duplicación/tiempo */
+        .time-to-duplicate {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #FFD700; /* Dorado para destacar el retorno */
+        }
+
+        /* Animación de Cambio de Precio más profesional */
+        .price-change-up { color: var(--color-profit) !important; transition: all 0.1s; }
+        .price-change-down { color: var(--color-danger) !important; transition: all 0.1s; }
+        .rotate-90 { transform: rotate(0deg); transition: transform 0.3s; } /* Ajuste a 0 grados para que apunte hacia arriba */
+        .-rotate-90 { transform: rotate(180deg); transition: transform 0.3s; } /* Ajuste a 180 grados para que apunte hacia abajo */
+        
+        /* Estilo para el Feed de Actividad - Limpio */
+        #activity-feed .activity-item {
+            padding: 6px 0;
+            border-bottom: 1px dashed #1F2937;
+        }
+        #activity-feed .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Estilos específicos para la Landing Page (Más corporativo) */
+        .landing-header { 
+            background-color: rgba(10, 10, 24, 0.8); 
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            border-bottom: 1px solid #1F2937;
+        }
+        .landing-card {
+            background-color: #151F2D;
+            border: 1px solid #374151;
+            border-radius: 16px;
+        }
+    </style>
+    <script>
+        
+        // --- 1. CONFIGURACIÓN INICIAL Y DATOS ---
+        
+        const ADMIN_EMAIL = 'admin@cloudcapital.com';
+        const DASHBOARD_EMAIL = 'andres@gmail.com';
+        const REAL_BTC_PRICE = 108025.30; 
+        
+        let isAuthenticated = false;
+        // Se añade 'superAdminTasks' y 'investmentClasses' como nuevas vistas
+        let currentView = 'landing'; // 'landing', 'login', 'dashboard', 'adminPanel', 'tasksPanel', 'taskDetail', 'superAdminTasks', 'investmentClasses' 
+        let currentLoggedInUserEmail = '';
+        let selectedUserForAdmin = null; // Usuario seleccionado en el panel de admin
+        let currentTaskId = null; // ID de la tarea seleccionada para el detalle
+        
+        // NUEVA VARIABLE DE ESTADO PARA EL FLUJO DE DEPÓSITO
+        let depositStep = 'selection'; // 'selection', 'manualForm', 'manualProof', 'autoAddress'
+        let generatedOrderId = null; // Para guardar el ID de la orden generada
+        let generatedOrderData = null; // Para guardar los datos del formulario
+
+        // --- DATOS DE CLASES DE INVERSIÓN (ACTUALIZADOS CON LOS NUEVOS PARÁMETROS DE LA TABLA) ---
+        const investmentClasses = {
+            'BRONCE': {
+                name: 'BRONCE',
+                color: 'text-[var(--color-profit)]', 
+                capitalMin: 100,
+                desc: 'Ideal para principiantes. Acceso a las operaciones base de la plataforma con menor prioridad.',
+                dailyProfit: '3% Mensual', 
+                monthlyCommission: '0%', 
+                priority: 'SIN REFERIDOS', 
+                timeToDuplicate: 'N/A', // No aplica para inversión pasiva
+                icon: 'cloud', 
+                upgradeTarget: 300,
+                upgradeCostRate: 0.15 
+            },
+            'PLATA': {
+                name: 'PLATA PREMIUM', 
+                color: 'text-[var(--color-profit)]', 
+                capitalMin: 300,
+                desc: 'Clase intermedia. Rendimiento 6% mensual. Mínimo 1 referido activo.', 
+                dailyProfit: '6% Mensual', 
+                monthlyCommission: '0%', 
+                priority: 'Referidos minimos: 1', 
+                timeToDuplicate: 'N/A', // No aplica para inversión pasiva
+                icon: 'crown', 
+                upgradeTarget: 700,
+                upgradeCostRate: 0.10 
+            },
+            /* --- CLASES MINERÍA CRYPTO (NOMBRES Y PARÁMETROS DE LA ÚLTIMA TABLA) --- */
+            'BASIC': { 
+                name: 'BASIC / STARTER',
+                color: 'text-gray-500', 
+                capitalMin: 100,
+                desc: 'Punto de inicio en minería. Rendimiento moderado y estructura clara.',
+                dailyProfit: '0.5% – 0.9 %',
+                monthlyCommission: '8', // Se usa solo el número para calcular el Promedio Diario
+                avgDailyProfit: '≈ 0.8 %', // Nuevo campo para el promedio
+                timeToDuplicate: '≈ 8.5 – 9 meses', 
+                priority: 'SIN REFERIDOS', 
+                icon: 'activity', 
+                upgradeTarget: 250,
+                upgradeCostRate: 0.10 
+            },
+            'SILVER': { 
+                name: 'SILVER',
+                color: 'text-gray-300', 
+                capitalMin: 250,
+                desc: 'Nivel medio. Rentabilidad estable y mejor tiempo de duplicación.',
+                dailyProfit: '0.8 % – 1.1 %', 
+                monthlyCommission: '8.5', 
+                avgDailyProfit: '≈ 1.0 %',
+                timeToDuplicate: '≈ 7 – 7.5 meses', 
+                priority: 'SIN REFERIDOS', 
+                icon: 'server', 
+                upgradeTarget: 1000,
+                upgradeCostRate: 0.08 
+            },
+            'GOLD': { 
+                name: 'GOLD',
+                color: 'text-yellow-400',
+                capitalMin: 1000,
+                desc: 'Rendimiento premium y alta prioridad en el pool de minería.',
+                dailyProfit: '1.0 % – 1.5 %', 
+                monthlyCommission: '9', 
+                avgDailyProfit: '≈ 1.2 %',
+                timeToDuplicate: '≈ 6 meses y 2 semanas', 
+                priority: 'SIN REFERIDOS', 
+                icon: 'activity', 
+                upgradeTarget: 2500,
+                upgradeCostRate: 0.05 
+            },
+            'PLATINUM': { 
+                name: 'PLATINUM',
+                color: 'text-sky-300', 
+                capitalMin: 2500,
+                desc: 'Acceso a infraestructura de élite y los rendimientos más altos por capital.',
+                dailyProfit: '1.5 % – 1.8 %', 
+                monthlyCommission: '9.5', 
+                avgDailyProfit: '≈ 1.6 %',
+                timeToDuplicate: '≈ 5 – 5.5 meses', 
+                priority: 'SIN REFERIDOS', 
+                icon: 'star',
+                upgradeTarget: 5000,
+                upgradeCostRate: 0.05 
+            },
+            'DIAMOND': { 
+                name: 'DIAMOND',
+                color: 'text-pink-400', 
+                capitalMin: 5000,
+                desc: 'La máxima categoría. Rendimiento optimizado y soporte dedicado.',
+                dailyProfit: '1.8 % – 2.2 %', 
+                monthlyCommission: '10', 
+                avgDailyProfit: '≈ 2.0 %',
+                timeToDuplicate: '≈ 4.5 – 5 meses', 
+                priority: 'SIN REFERIDOS', 
+                icon: 'gem',
+                upgradeTarget: null,
+                upgradeCostRate: 0
+            }
+        };
+
+        // Ajuste en la función getUserClass para manejar la nueva jerarquía de capital mínimo
+        function getUserClass(email) {
+            const user = simulatedUsers[email];
+            if (!user) return investmentClasses.BRONCE;
+
+            const balance = user.currentBalanceUSDT;
+            
+            // Prioridad a los planes de Minería por su alto capital
+            if (balance >= investmentClasses.DIAMOND.capitalMin) return investmentClasses.DIAMOND;
+            if (balance >= investmentClasses.PLATINUM.capitalMin) return investmentClasses.PLATINUM;
+            if (balance >= investmentClasses.GOLD.capitalMin) return investmentClasses.GOLD;
+            if (balance >= investmentClasses.SILVER.capitalMin) return investmentClasses.SILVER;
+            if (balance >= investmentClasses.BASIC.capitalMin) return investmentClasses.BASIC;
+
+            // Planes de Nube
+            if (balance >= investmentClasses.PLATA.capitalMin) return investmentClasses.PLATA;
+            return investmentClasses.BRONCE;
+        }
+        
+        let simulatedUsers = {
+            [ADMIN_EMAIL]: { // Añadimos al admin a los usuarios para referencia en tareas
+                email: ADMIN_EMAIL, 
+                name: 'Super Admin', 
+                id: 'ADMIN-001',
+                capitalUSDT: 999999.00, 
+                currentBalanceUSDT: 999999.00,
+                btcPriceUSDT: REAL_BTC_PRICE,
+                username: 'SA_Root'
+            },
+            [DASHBOARD_EMAIL]: { 
+                email: DASHBOARD_EMAIL, 
+                name: 'Andres', 
+                id: 'USER-001',
+                capitalUSDT: 350.00, 
+                currentBalanceUSDT: 1080.00,
+                btcPriceUSDT: REAL_BTC_PRICE,
+                username: 'ZekyAlpha'
+            },
+            'carlos@test.com': { 
+                email: 'carlos@test.com', 
+                name: 'Carlos Test', 
+                id: 'USER-002',
+                capitalUSDT: 500.00, 
+                currentBalanceUSDT: 750.00,
+                btcPriceUSDT: REAL_BTC_PRICE,
+                username: 'CarlosTester'
+            },
+            'subadmin@cc.com': { // Nuevo usuario simulado como Sub-Admin
+                email: 'subadmin@cc.com', 
+                name: 'Sub Admin One', 
+                id: 'ADMIN-002',
+                capitalUSDT: 0.00, 
+                currentBalanceUSDT: 0.00,
+                btcPriceUSDT: REAL_BTC_PRICE,
+                username: 'Sub_A1'
+            },
+            'felipe@test.com': { 
+                email: 'felipe@test.com', 
+                name: 'Felipe Gómez', 
+                id: 'USER-003',
+                capitalUSDT: 100.00, 
+                currentBalanceUSDT: 150.00,
+                btcPriceUSDT: REAL_BTC_PRICE,
+                username: 'FelipeG'
+            }
+        };
+        
+        // Datos de Tareas (Solo disponibles para el Admin)
+        let simulatedTasks = [
+            // Tarea de Depósito Pendiente de Revisión inicial (para el Sub-Admin)
+            { id: 1, type: 'Depósito Manual', userEmail: 'carlos@test.com', amountUSD: 250.00, reference: 'TxID: 0x9fA2...', status: 'Pendiente', date: '2025-09-29 10:30', action: 'Aprobar Depósito', proof: 'https://placehold.co/400x300/1E293B/94A3B8?text=COMPROBANTE+CARGADO', approvedByAdmin: null },
+            // Tarea de Depósito Pre-Aprobada (para el Super-Admin)
+            { id: 7, type: 'Depósito Manual', userEmail: 'felipe@test.com', amountUSD: 150.00, reference: 'TxID: 0x1A2B...', status: 'Pre-aprobada', date: '2025-11-04 15:00', action: 'Aprobar Final', proof: 'https://placehold.co/400x300/1E293B/94A3B8?text=COMPROBANTE+PRE-APROBADO', approvedByAdmin: 'subadmin@cc.com' },
+            { id: 8, type: 'Depósito Manual', userEmail: DASHBOARD_EMAIL, amountUSD: 500.00, reference: 'TxID: 0x3C4D...', status: 'Pre-aprobada', date: '2025-11-04 16:30', action: 'Aprobar Final', proof: 'https://placehold.co/400x300/1E293B/94A3B8?text=COMPROBANTE+PRE-APROBADO', approvedByAdmin: 'subadmin@cc.com' },
+
+            // Depósitos manuales pendientes de revisión
+            { id: 2, type: 'Depósito Manual', userEmail: 'andres@gmail.com', amountUSD: 50.00, reference: 'TxID: 0x1bC9...', status: 'Pendiente', date: '2025-09-29 12:45', action: 'Aprobar Depósito', proof: 'https://placehold.co/400x300/1E293B/94A3B8?text=COMPROBANTE+CARGADO', approvedByAdmin: null },
+            // Retiros pendientes de desembolso
+            { id: 3, type: 'Retiro Pendiente', userEmail: 'carlos@test.com', amountUSD: 120.50, reference: 'BTC Wallet: bc1q...', status: 'Pendiente', date: '2025-09-28 18:00', action: 'Procesar Retiro', proof: null, approvedByAdmin: null },
+            { id: 4, type: 'Retiro Pendiente', userEmail: 'felipe@test.com', amountUSD: 300.00, reference: 'BTC Wallet: bc1z...', status: 'Pendiente', date: '2025-09-28 20:15', action: 'Procesar Retiro', proof: null, approvedByAdmin: null },
+            
+            // Tarea de Liquidación
+            { 
+                id: 6, 
+                type: 'Liquidación Total', 
+                userEmail: DASHBOARD_EMAIL, // Usamos a Zeky para la simulación
+                amountUSD: 470.00, 
+                reference: 'Wallet BTC: bc1q...xy5 | Banco: N/A', 
+                status: 'Pendiente', 
+                date: '2025-11-04 09:00', 
+                action: 'Procesar Liquidación', 
+                proof: null, 
+                approvedByAdmin: null,
+                liquidationDetails: {
+                    initialCapital: 350.00,
+                    totalBalance: 470.00,
+                    totalProfit: 120.00,
+                    penaltyProfitRate: 1.00, 
+                    penaltyCapitalRate: 0.39, 
+                    destination: 'Wallet BTC: bc1q...xy5 (Blockchain)'
+                }
+            },
+            
+            // Tarea completada (ejemplo)
+            { id: 5, type: 'Depósito Manual', userEmail: 'demo@user.com', amountUSD: 100.00, reference: 'TxID: 0x3dF0...', status: 'Completada', date: '2025-09-27 09:00', action: 'Revisado', proof: null, approvedByAdmin: 'subadmin@cc.com' },
+        ];
+        
+        // Contador de tareas pendientes (Sub-Admin - estado 'Pendiente')
+        function getPendingTasksCount() {
+            return simulatedTasks.filter(task => task.status === 'Pendiente').length;
+        }
+
+        // Contador de tareas pre-aprobadas (Super-Admin - estado 'Pre-aprobada' y solo Depósitos)
+        function getSuperAdminTasksCount() {
+            return simulatedTasks.filter(task => 
+                task.status === 'Pre-aprobada' && task.type === 'Depósito Manual'
+            ).length;
+        }
+
+        // --- FUNCION CLAVE: CALCULAR LIQUIDACIÓN ---
+        function calculateLiquidation(task) {
+            const { initialCapital, totalProfit, penaltyProfitRate, penaltyCapitalRate, totalBalance } = task.liquidationDetails;
+
+            // 1. Multa sobre Ganancias: 100%
+            const profitPenalty = totalProfit * penaltyProfitRate;
+            
+            // 2. Multa sobre Capital: 39%
+            const capitalPenalty = initialCapital * penaltyCapitalRate;
+            
+            // Multa total
+            const totalPenalty = profitPenalty + capitalPenalty;
+            
+            // Monto a devolver (balance - multas)
+            const amountToReturn = totalBalance - totalPenalty;
+
+            return {
+                initialCapital,
+                totalProfit,
+                totalBalance,
+                profitPenalty,
+                capitalPenalty,
+                totalPenalty: parseFloat(totalPenalty.toFixed(2)),
+                amountToReturn: parseFloat(amountToReturn.toFixed(2))
+            };
+        }
+
+
+        // Función para obtener el usuario activo (dashboard) o un usuario para admin
+        function getUserData(email = currentLoggedInUserEmail) {
+            // Devuelve una copia profunda o busca por email
+            const user = simulatedUsers[email];
+            return user ? JSON.parse(JSON.stringify(user)) : null;
+        }
+        
+        // Función para obtener una tarea por ID
+        function getTaskData(taskId) {
+            return simulatedTasks.find(task => task.id === taskId);
+        }
+        
+        // Función para completar o pre-aprobar la tarea
+        window.completeTask = function(taskId) {
+            const task = getTaskData(taskId);
+            
+            if (!task) {
+                alertUser('Error: Tarea no encontrada.', 'bg-red-600');
+                return;
+            }
+            
+            const user = simulatedUsers[task.userEmail];
+            
+            if (task.status === 'Pendiente') {
+                // Lógica de Pre-Aprobación (Sub-Admin) - Simula que el Admin revisó y aprobó para el S-Admin
+                if (task.type === 'Depósito Manual' || task.type === 'Depósito Manual (Usuario)') {
+                    task.status = 'Pre-aprobada';
+                    task.approvedByAdmin = currentLoggedInUserEmail; // El admin actual pre-aprueba
+                    task.action = 'Aprobar Final';
+                    alertUser(`Depósito #${taskId} Pre-aprobado por ${simulatedUsers[currentLoggedInUserEmail].name}. Pendiente de Aprobación Final.`, 'bg-orange-500');
+                    setView('tasksPanel'); // Vuelve al panel de tareas pendientes del Sub-Admin
+                    return;
+                } 
+                
+                // Otras tareas pendientes (Retiro, Liquidación) se aprueban directo si no son depósitos
+                // Aplicar el cambio de saldo y marcar como Completada
+                if (user && task.amountUSD) {
+                    // Retiro o Liquidación (restar saldo)
+                    let amountToAdjust = task.type === 'Liquidación Total' 
+                        ? calculateLiquidation(task).amountToReturn 
+                        : task.amountUSD;
+
+                    // Si es retiro/liquidación, se asume que el saldo ya salió (o fue separado)
+                    // Por simplicidad en esta simulación, solo marcamos como completado para Retiros/Liquidaciones
+                    // Si fuera Depósito, sumaría el saldo aquí (pero el flujo de Depósito Manual ahora es doble)
+                    
+                    if (task.type === 'Liquidación Total') {
+                        // Resetear el capital a 0 y el balance a 0 (por ser liquidación total)
+                        user.currentBalanceUSDT = 0;
+                        user.capitalUSDT = 0;
+                        alertUser(`Liquidación #${taskId} completada. Saldo del usuario (${user.name}) reseteado a $0.00 USD.`, 'bg-red-700');
+                    } else if (task.type === 'Retiro Pendiente') {
+                        // Se asume que el saldo ya fue verificado antes. Solo se marca como completado
+                        alertUser(`Retiro #${taskId} procesado y completado.`, 'bg-red-600');
+                    }
+                }
+                
+                task.status = 'Completada';
+                task.action = 'Completado';
+                setView('tasksPanel');
+
+            } else if (task.status === 'Pre-aprobada') {
+                // Lógica de Aprobación Final (Super-Admin) - Solo para Depósitos Manuales
+                if ((task.type === 'Depósito Manual' || task.type === 'Depósito Manual (Usuario)') && user && task.amountUSD) {
+                    // Sumar el saldo solo en la aprobación final
+                    user.currentBalanceUSDT = parseFloat((user.currentBalanceUSDT + task.amountUSD).toFixed(2));
+                    user.capitalUSDT = parseFloat((user.capitalUSDT + task.amountUSD).toFixed(2));
+
+                    task.status = 'Completada';
+                    task.action = `Aprobado por ${simulatedUsers[currentLoggedInUserEmail].name}`;
+                    task.date = new Date().toISOString().slice(0, 19).replace('T', ' '); // Actualizar fecha de completado
+                    
+                    alertUser(`Depósito #${taskId} APROBADO FINALMENTE. Se acreditaron $${formatUSDT(task.amountUSD)} USD al usuario ${user.name}.`, 'bg-green-600');
+                    setView('superAdminTasks');
+                } else {
+                    alertUser('Error: Esta tarea no es un depósito pre-aprobado o faltan datos.', 'bg-red-600');
+                }
+            }
+        }
+
+
+        // --- 2. FUNCIONES DE FORMATO GLOBALES ---
+        function formatUSDT(amount) { 
+            if (isNaN(amount)) return '0.00';
+            const formatted = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount);
+            return formatted;
+        }
+        
+        function formatPrice(price) {
+            if (isNaN(price)) return '0.00';
+            const formatted = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(price);
+            return formatted;
+        }
+
+        function formatBTC(amount) {
+            if (isNaN(amount)) return '0.0000000'; 
+            return parseFloat(amount).toFixed(7); 
+        }
+        
+        window.formatUSDT = formatUSDT;
+        window.formatPrice = formatPrice;
+        window.formatBTC = formatBTC;
+        
+        // GENERACIÓN DE ID DE ORDEN SIMULADO
+        function generateUniqueOrderId() {
+            return 'ORD-' + Math.floor(100000 + Math.random() * 900000) + '-' + new Date().getTime().toString().slice(-4);
+        }
+
+        // LÓGICA DE MANEJO DE DEPÓSITO MANUAL
+        window.handleManualDeposit = function() {
+            const amount = document.getElementById('manual-amount').value;
+            const bank = document.getElementById('manual-bank').value;
+            const name = document.getElementById('manual-name').value;
+            const cedula = document.getElementById('manual-cedula').value;
+
+            if (!amount || bank === '' || !name || !cedula || parseFloat(amount) < 50) { // Validar que se haya seleccionado un banco
+                alertUser('Por favor, completa todos los campos. El monto mínimo es de $50 USD.', 'bg-red-600');
+                return;
+            }
+            
+            // 1. Generar ID y almacenar datos
+            generatedOrderId = generateUniqueOrderId();
+            generatedOrderData = { amount: parseFloat(amount), bank, name, cedula, date: new Date().toLocaleString('es-ES') };
+            
+            // 2. Simular envío de tarea al admin
+            simulatedTasks.push({
+                id: Math.max(...simulatedTasks.map(t => t.id)) + 1,
+                type: 'Depósito Manual (Usuario)',
+                userEmail: currentLoggedInUserEmail,
+                amountUSD: parseFloat(amount),
+                reference: `Banco: ${bank} | ID: ${cedula}`,
+                status: 'Pendiente',
+                date: new Date().toISOString().slice(0, 19).replace('T', ' '),
+                action: 'Aprobar Depósito',
+                proof: 'https://placehold.co/400x300/1E293B/94A3B8?text=ORDEN+GENERADA+MANUALMENTE', // Placeholder for proof
+                manualDetails: generatedOrderData // Guardar detalles para referencia
+            });
+            
+            // 3. Cambiar el paso del modal a comprobante
+            showDepositModal('manualProof');
+            alertUser('¡Orden de depósito generada con éxito! Revisa el comprobante.', 'bg-green-600');
+        }
+
+        // FUNCIÓN PARA RENDERIZAR EL CONTENIDO DINÁMICO DEL MODAL DE DEPÓSITO
+        function renderDepositModalContent() {
+            // Paso 1: Selección de método
+            if (depositStep === 'selection') {
+                return `
+                    <div class="space-y-4">
+                        <p class="text-lg font-semibold text-[var(--color-text)] mb-6 text-center">Selecciona cómo deseas añadir capital:</p>
+                        <button onclick="showDepositModal('autoAddress')" class="w-full card p-4 rounded-xl flex items-center justify-between hover:bg-gray-700/50 transition duration-200 border border-gray-700">
+                            <div>
+                                <p class="font-bold text-xl text-[var(--color-accent)]">Automático (Wallets)</p>
+                                <p class="text-sm text-[var(--color-subtext)]">Usa tu wallet BTC. Acreditación inmediata.</p>
+                            </div>
+                            <i data-lucide="scan" class="w-6 h-6 text-[var(--color-accent)]"></i>
+                        </button>
+                        <button onclick="showDepositModal('manualForm')" class="w-full card p-4 rounded-xl flex items-center justify-between hover:bg-gray-700/50 transition duration-200 border border-gray-700">
+                            <div>
+                                <p class="font-bold text-xl text-[var(--color-profit)]">Manual (Transferencia Bancaria)</p>
+                                <p class="text-sm text-[var(--color-subtext)]">Transfiere desde tu banco local. Requiere verificación.</p>
+                            </div>
+                            <i data-lucide="banknote" class="w-6 h-6 text-[var(--color-profit)]"></i>
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-6 text-center">Cloud Capital acepta depósitos tanto en criptomonedas como en moneda fiduciaria local (USD, EUR, etc.) vía transferencia.</p>
+                `;
+            }
+
+            // Paso 2: Formulario Manual
+            if (depositStep === 'manualForm') {
+                return `
+                    <form id="manualDepositForm" onsubmit="event.preventDefault(); handleManualDeposit();" class="space-y-4">
+                        <p class="text-sm text-yellow-400 bg-gray-800 p-2 rounded-lg text-center">Completa los datos para generar tu orden de depósito. (Mínimo $50.00 USD)</p>
+                        
+                        <label for="manual-amount" class="block text-sm font-medium text-[var(--color-text)]">Cantidad a depositar (USD):</label>
+                        <input type="number" id="manual-amount" step="1.00" placeholder="Mínimo $50.00 USD" required class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-[var(--color-profit)] focus:border-[var(--color-profit)] focus:outline-none">
+                        
+                        <label for="manual-bank" class="block text-sm font-medium text-[var(--color-text)]">Banco de preferencia:</label>
+                        <!-- SELECT PARA BANCO -->
+                        <select id="manual-bank" required class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-[var(--color-profit)] focus:border-[var(--color-profit)] focus:outline-none appearance-none">
+                            <option value="" disabled selected>Selecciona tu banco...</option>
+                            <option value="Banco Pichincha">Banco Pichincha</option>
+                            <option value="Banco Guayaquil">Banco Guayaquil</option>
+                            <option value="Banco Produbanco">Banco Produbanco</option>
+                            <option value="Banco del Pacífico">Banco del Pacífico</option>
+                            <option value="Bancolombia">Bancolombia</option>
+                            <option value="Otro Banco Local">Otro Banco Local</option>
+                        </select>
+
+                        <label for="manual-name" class="block text-sm font-medium text-[var(--color-text)]">Nombres completos:</label>
+                        <input type="text" id="manual-name" placeholder="${simulatedUsers[currentLoggedInUserEmail]?.name || 'Tus nombres completos'}" required class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-[var(--color-profit)] focus:border-[var(--color-profit)] focus:outline-none">
+                        
+                        <label for="manual-cedula" class="block text-sm font-medium text-[var(--color-text)]">Cédula y/o Pasaporte:</label>
+                        <input type="text" id="manual-cedula" placeholder="Tu número de identificación" required class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-[var(--color-profit)] focus:border-[var(--color-profit)] focus:outline-none">
+                        
+                        <button type="submit" class="w-full bg-[var(--color-profit)] hover:bg-emerald-400 text-black font-bold py-3 rounded-xl transition duration-200 shadow-lg shadow-emerald-400/50">
+                            Generar Orden
+                        </button>
+                    </form>
+                    <button onclick="showDepositModal('selection')" class="w-full text-gray-400 hover:text-white text-sm mt-3">
+                        ← Volver a Selección de Método
+                    </button>
+                `;
+            }
+            
+            // Paso 3: Comprobante Generado
+            if (depositStep === 'manualProof' && generatedOrderData) {
+                const order = generatedOrderData;
+                const whatsappLink = `https://wa.me/593999999999?text=Hola%2C%20acabo%20de%20generar%20una%20orden%20de%20depósito%20manual%20con%20ID%3A%20${generatedOrderId}%20por%20%24${formatUSDT(order.amount)}%20USD.`;
+                
+                return `
+                    <div class="relative bg-gray-900 p-6 rounded-xl border-4 border-dashed border-[var(--color-accent)] shadow-2xl space-y-4">
+                        
+                        <!-- BOTÓN DE CIERRE (X) AGREGADO AQUÍ -->
+                        <button onclick="hideModal('depositModal')" class="absolute top-3 right-3 text-white hover:text-gray-400 text-3xl leading-none font-light p-2 rounded-full bg-black/50 transition">&times;</button>
+                        
+                        <h4 class="text-3xl font-extrabold text-center text-[var(--color-text)]">ORDEN GENERADA</h4>
+                        <p class="text-xl font-black text-center text-[var(--color-profit)]">$${formatUSDT(order.amount)} USD</p>
+
+                        <div class="grid grid-cols-2 gap-3 text-sm border-t border-b border-gray-700 py-3">
+                            <p class="text-[var(--color-subtext)]">Banco:</p><p class="font-semibold text-right text-[var(--color-text)]">${order.bank}</p>
+                            <p class="text-[var(--color-subtext)]">Nombre:</p><p class="font-semibold text-right text-[var(--color-text)]">${order.name}</p>
+                            <p class="text-[var(--color-subtext)]">ID:</p><p class="font-semibold text-right text-[var(--color-text)]">${order.cedula}</p>
+                            <p class="text-[var(--color-subtext)]">Fecha/Hora:</p><p class="font-semibold text-right text-[var(--color-text)]">${order.date}</p>
+                        </div>
+                        
+                        <div class="bg-gray-800 p-3 rounded-lg text-center">
+                            <p class="text-base font-medium text-[var(--color-subtext)]">Número de ID de la ORDEN:</p>
+                            <span id="order-id-display" class="text-3xl font-black text-[var(--color-accent)]">${generatedOrderId}</span>
+                        </div>
+
+                        <p class="text-center text-red-500 font-black text-xl pt-4">
+                            POR FAVOR TOMAR CAPTURA A ESTE COMPROBANTE Y ENVIARLO AL SIGUIENTE CHAT
+                        </p>
+                        
+                        <!-- NOTA PARA EL DESARROLLADOR (Asterisco solicitado) -->
+                        <p class="text-xs text-gray-500 text-center border-t border-gray-700 pt-2 mt-4">
+                            * NOTA PARA EL DESARROLLADOR: LA ORDEN TIENE QUE SALIR EN EL PANEL DEL ADMINISTRADOR PARA PODER VERIFICAR LA ORDEN Y POSTERIORMENTE EN HISTORIAL DE ORDENES.
+                        </p>
+
+                        <a href="${whatsappLink}" target="_blank" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl transition duration-200 text-lg flex items-center justify-center shadow-lg shadow-green-700/50">
+                            <i data-lucide="message-square" class="w-5 h-5 mr-3"></i> Enviar Comprobante por WhatsApp
+                        </a>
+                        <p class="text-xs text-gray-500 text-center">Simulación: Se usó un número de WhatsApp genérico (+593 999 999 999).</p>
+                    </div>
+
+                    <button onclick="hideModal('depositModal')" class="w-full text-gray-400 hover:text-white text-sm mt-4">
+                        Cerrar (Su orden ha sido guardada)
+                    </button>
+                `;
+            }
+            
+            // Paso 4: Dirección Automática (BTC - El original)
+            if (depositStep === 'autoAddress') {
+                return `
+                    <p class="text-center mb-4 text-sm font-semibold text-yellow-400 bg-gray-800 p-2 rounded-lg">¡IMPORTANTE! Envía SOLAMENTE BTC a esta dirección.</p>
+                    
+                    <div class="flex flex-col items-center">
+                        <img src="https://placehold.co/200x200/F7931A/0A0A0C?text=QR+BTC" alt="QR Code de depósito" class="rounded-lg border-4 border-[var(--color-accent)] mb-4">
+                        
+                        <p class="text-xs text-gray-400 mb-2">Tu dirección de depósito única (BTC Network):</p>
+                        <div class="bg-gray-800 p-3 rounded-xl flex justify-between items-center w-full max-w-xs">
+                            <span class="text-sm font-mono truncate text-[var(--color-text)]" id="deposit-address">bc1qj4w8c...20a8x9</span>
+                            <button onclick="copyToClipboard('deposit-address')" class="ml-3 text-[var(--color-accent)] hover:text-blue-500 font-bold text-sm">Copiar</button>
+                        </div>
+                    </div>
+
+                    <p class="text-sm text-gray-400 mt-4 text-center">Mínimo de depósito: 0.001 BTC.</p>
+                    <button onclick="showDepositModal('selection')" class="w-full text-gray-400 hover:text-white text-sm mt-3">
+                        ← Volver a Selección de Método
+                    </button>
+                `;
+            }
+            
+            // Si no hay paso, vuelve a la selección (o un error)
+            return `<div class="text-center p-4">Error. <button onclick="showDepositModal('selection')" class="text-[var(--color-accent)]">Volver</button></div>`;
+        }
+
+        // Función para cambiar el paso del modal de depósito y mostrarlo
+        window.showDepositModal = function(step = 'selection') {
+            depositStep = step;
+            const titleEl = document.getElementById('depositModalTitle');
+            const contentEl = document.getElementById('depositModalContent');
+
+            if (titleEl && contentEl) {
+                if (step === 'selection') {
+                    titleEl.innerText = 'Seleccionar Tipo de Depósito';
+                } else if (step === 'autoAddress') {
+                    titleEl.innerText = 'Depositar BTC (Automático)';
+                } else if (step === 'manualForm') {
+                     titleEl.innerText = 'Depósito Manual (Transferencia)';
+                } else if (step === 'manualProof') {
+                     titleEl.innerText = 'Comprobante de Orden Generada';
+                }
+                contentEl.innerHTML = renderDepositModalContent();
+            }
+            showModal('depositModal');
+            
+            // Re-renderizar iconos de Lucide si están en el contenido inyectado
+            setTimeout(() => {
+                if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                    lucide.createIcons();
+                }
+            }, 50);
+        }
+
+        // --- 3. FUNCIONES PARA EL FONDO CON CANVAS (DEGRADADO DINÁMICO) ---
+        function initBackgroundCanvas() {
+            const canvas = document.getElementById('background-canvas');
+            const ctx = canvas.getContext('2d');
+            let animationFrameId;
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+
+            // Colores oscuros y profundos para el degradado nocturno
+            // Ajuste de colores para un tono más frío y profundo (más profesional)
+            const colors = [
+                '#0A0A18', '#0D132D', '#111B3A', '#16244E', '#1D3065',
+            ];
+
+            let colorStops = [0, 0.25, 0.5, 0.75, 1];
+            let time = 0;
+
+            function draw() {
+                if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+                    resizeCanvas();
+                }
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+
+                time += 0.005;
+                
+                // Animación de los puntos de color más sutil
+                colorStops[0] = (Math.sin(time * 0.2) * 0.03) + 0;
+                colorStops[2] = (Math.sin(time * 0.15) * 0.03) + 0.5; 
+                colorStops[4] = (Math.cos(time * 0.25) * 0.03) + 1; 
+
+                gradient.addColorStop(0, colors[0]); 
+                gradient.addColorStop(colorStops[1], colors[1]);
+                gradient.addColorStop(colorStops[2], colors[2]); 
+                gradient.addColorStop(colorStops[3], colors[3]);
+                gradient.addColorStop(1, colors[4]); 
+
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                animationFrameId = requestAnimationFrame(draw);
+            }
+
+            resizeCanvas();
+            animationFrameId = requestAnimationFrame(draw);
+
+            window.addEventListener('resize', resizeCanvas);
+        }
+
+        // --- 4. FUNCIONES DE NAVEGACIÓN Y AUTENTICACIÓN ---
+        
+        // Función principal para cambiar la vista
+        function setView(view) {
+            // Detener simulaciones si es necesario
+            if (currentView === 'dashboard' && typeof stopSimulation === 'function') {
+                stopSimulation();
+            }
+            // Limpiar ID de tarea al cambiar a una vista principal
+            if (view !== 'taskDetail') {
+                 currentTaskId = null;
+            }
+
+            currentView = view;
+            renderApp();
+            
+            setTimeout(() => {
+                if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                    lucide.createIcons();
+                }
+                // Si la vista es el dashboard, reinicializar la simulación
+                if (view === 'dashboard' && typeof initializeDashboard === 'function') {
+                    initializeDashboard();
+                }
+            }, 50);
+        }
+        
+        // Nueva función para ir al detalle de una tarea
+        window.goToTaskDetail = function(taskId) {
+            currentTaskId = taskId;
+            setView('taskDetail');
+        }
+
+        // Simulación de Login/Registro
+        function handleAuth(type) {
+            // ADMIN CREDENTIALS
+            const ADMIN_PASSWORD = 'admin123';
+            
+            // DASHBOARD USER CREDENTIALS (Zeky)
+            const VALID_EMAIL = DASHBOARD_EMAIL;
+            const VALID_PASSWORD = 'Andres';
+
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const messageEl = document.getElementById('auth-message');
+            
+            // Lógica de autenticación del ADMIN
+            if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+                isAuthenticated = true;
+                currentLoggedInUserEmail = ADMIN_EMAIL;
+                messageEl.className = 'text-center text-lg font-bold text-[var(--color-admin)] my-4';
+                messageEl.innerText = `¡Bienvenido, Super Administrador! Accediendo al Panel...`;
+                // El admin va directamente al panel de tareas pre-aprobadas si hay, sino al panel de tareas pendientes
+                setTimeout(() => {
+                    if (getSuperAdminTasksCount() > 0) {
+                        setView('superAdminTasks');
+                    } else if (getPendingTasksCount() > 0) {
+                        setView('tasksPanel');
+                    } else {
+                        setView('adminPanel');
+                    }
+                }, 1500); 
+                return;
+            }
+            
+            // Lógica de autenticación del USUARIO
+            if (email === VALID_EMAIL && password === VALID_PASSWORD) {
+                isAuthenticated = true;
+                currentLoggedInUserEmail = VALID_EMAIL;
+                messageEl.className = 'text-center text-lg font-bold text-[var(--color-profit)] my-4';
+                messageEl.innerText = `¡Bienvenido, Zeky! Accediendo al Dashboard...`;
+                setTimeout(() => setView('dashboard'), 1500); 
+                return;
+            }
+            
+            // Lógica de autenticación del SUB-ADMIN (simulación)
+            if (email === 'subadmin@cc.com' && password === 'subadmin123') {
+                isAuthenticated = true;
+                currentLoggedInUserEmail = 'subadmin@cc.com';
+                messageEl.className = 'text-center text-lg font-bold text-sky-400 my-4';
+                messageEl.innerText = `¡Bienvenido, Sub Administrador! Accediendo al Panel...`;
+                setTimeout(() => {
+                    if (getPendingTasksCount() > 0) {
+                        setView('tasksPanel');
+                    } else {
+                        setView('adminPanel');
+                    }
+                }, 1500); 
+                return;
+            }
+
+            // Error
+            isAuthenticated = false;
+            currentLoggedInUserEmail = '';
+            messageEl.className = 'text-center text-sm font-semibold text-red-500 my-4';
+            messageEl.innerText = 'Credenciales incorrectas. Intenta de nuevo.';
+        }
+        
+        // Simulación de Logout
+        function handleLogout() {
+            isAuthenticated = false;
+            currentLoggedInUserEmail = '';
+            setView('landing');
+            if (typeof stopSimulation === 'function') {
+                stopSimulation();
+            }
+        }
+        
+        // Notificación simple (reemplazo de alert)
+        window.alertUser = function(message, bgColor) {
+            const container = document.createElement('div');
+            container.className = `fixed top-5 right-5 z-[999] p-4 rounded-lg shadow-xl text-white font-semibold transition-opacity duration-300 ${bgColor}`;
+            container.innerText = message;
+            document.body.appendChild(container);
+            setTimeout(() => {
+                container.classList.add('opacity-0');
+                container.addEventListener('transitionend', () => container.remove());
+            }, 3000);
+        }
+
+        // Muestra el modal (Función Genérica)
+        window.showModal = function(id) {
+            document.getElementById(id).classList.remove('hidden');
+            document.getElementById(id).classList.add('flex');
+        }
+
+        // Oculta el modal (Función Genérica)
+        window.hideModal = function(id) {
+            document.getElementById(id).classList.add('hidden');
+            document.getElementById(id).classList.remove('flex');
+        }
+
+        // --- 5. VISTA DE LOGIN/REGISTRO ---
+        function renderAuthPage() {
+            return `
+                <div class="min-h-screen flex items-center justify-center p-4">
+                    <div class="w-full max-w-md card p-8 rounded-2xl border-t-4 border-[var(--color-accent)]">
+                        <h1 class="text-4xl font-black text-center text-[var(--color-accent)] mb-4">Cloud Capital</h1>
+                        <p class="text-center text-[var(--color-subtext)] mb-8">Accede a tu panel de inversión sostenible.</p>
+
+                        <div id="auth-message" class="text-center text-sm font-semibold text-red-500 my-4"></div>
+
+                        <div class="space-y-4">
+                            <input type="email" id="auth-email" value="${DASHBOARD_EMAIL}" placeholder="Correo Electrónico" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] focus:outline-none">
+                            <input type="password" id="auth-password" value="Andres" placeholder="Contraseña" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] focus:outline-none">
+                        </div>
+                        <p class="text-center text-xs text-gray-500 mt-2">
+                            Prueba: <code class="text-[var(--color-admin)]">admin@cloudcapital.com</code>, <code class="text-[var(--color-admin)]">admin123</code> (Super Admin) o <code class="text-sky-400">subadmin@cc.com</code>, <code class="text-sky-400">subadmin123</code> (Sub Admin).
+                        </p>
+
+                        <button onclick="handleAuth('login')" class="w-full bg-[var(--color-accent)] hover:bg-blue-500 text-white font-bold py-3 rounded-lg mt-6 transition duration-200 shadow-lg shadow-blue-500/30">
+                            Acceder a mi Cuenta
+                        </button>
+                        
+                        <p class="text-center text-sm text-[var(--color-subtext)] mt-4">
+                            ¿No tienes cuenta? 
+                            <a href="#" onclick="alertUser('Simulación de Registro', 'bg-sky-600')" class="text-[var(--color-profit)] hover:text-emerald-400 font-semibold">Regístrate Aquí</a>
+                        </p>
+
+                        <button onclick="setView('landing')" class="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 rounded-lg mt-4 transition duration-200 text-sm">
+                            Volver a la Landing
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- 6. VISTA DE LANDING PAGE (RENOMBRADA Y REFINADA) ---
+        function renderLandingPage() {
+             // Definiciones de datos de la Landing Page
+            const faqs = [
+                { question: '¿Cómo funciona el modelo de inversión de Could Capital?', answer: 'Could Capital combina minería de criptomonedas con energía limpia y servicios en la nube para startups. Tu inversión se integra en operaciones reales respaldadas por infraestructura tecnológica y centros de datos ecológicos.' },
+                { question: '¿De dónde provienen las ganancias?', answer: 'Las ganancias provienen de la minería sostenible de criptomonedas y de los servicios cloud empresariales, generando ingresos estables y escalables.' },
+                { question: '¿Qué necesito para empezar a invertir?', answer: 'Solo necesitas crear una cuenta, verificar tu identidad y realizar un depósito mínimo en criptomonedas. Desde tu panel podrás elegir un plan y monitorear tus rendimientos en tiempo real.' },
+                { question: '¿Cuánto puedo ganar y con qué frecuencia?', answer: 'Dependiendo del plan, puedes obtener entre un 2% semanal y un 2% diario. Los rendimientos se acreditan automáticamente y puedes reinvertirlos o retirarlos cuando desees.' },
+                { question: '¿Puedo invitar a otras personas?', answer: 'Sí. Contamos con un Programa de Embajadores mediante el cual puedes obtener comisiones adicionales por cada inversor que se registre con tu enlace personal. Es una forma de convertir tu red en ingresos pasivos.' },
+                { question: '¿Mi inversión está segura?', answer: 'Sí. Trabajamos con carteras frías de custodia, encriptación avanzada y centros de datos certificados. Todo el sistema está diseñado para ofrecer máxima transparencia y protección.' },
+                { question: '¿Puedo retirar mi dinero en cualquier momento?', answer: 'Sí, los retiros están habilitados las 24 horas y pueden solicitarse en cualquier momento. Los desembolsos se procesan cada viernes y se acreditan directamente a tu billetera sin intermediarios ni demoras.' },
+                { question: '¿Qué diferencia a Could Capital de otras plataformas?', answer: 'A diferencia de los modelos especulativos, Could Capital no depende de entradas nuevas para sostener ganancias. Nuestra rentabilidad proviene de operaciones reales, con un compromiso ecológico y sostenible.' },
+                { question: '¿Cómo sé que mis rendimientos son reales?', answer: 'Podrás verificar tus resultados desde tu panel personal con métricas actualizadas e informes automáticos. Publicamos reportes semanales de rendimiento y consumo energético.' },
+                { question: '¿Dónde puedo recibir soporte o asistencia?', answer: 'Nuestro equipo de soporte está disponible 24/7 a través del chat en línea y correo electrónico. También contamos con canales oficiales en Telegram y Discord para comunicación directa.' }
+            ];
+            
+            let landingHtml = `
+                <div class="min-h-screen bg-transparent text-[var(--color-text)] font-sans">
+                    <!-- Header/Nav --><header class="landing-header">
+                        <div class="max-w-7xl mx-auto flex justify-between items-center py-4 px-4 sm:px-6">
+                            <div class="text-2xl font-extrabold text-[var(--color-accent)]">Cloud Capital</div>
+                            <nav class="hidden sm:flex space-x-8 text-[var(--color-subtext)] font-medium text-sm">
+                                <a href="#hero" class="hover:text-[var(--color-accent)] transition-colors">Inicio</a>
+                                <a href="#plans-section" class="hover:text-[var(--color-accent)] transition-colors">Planes</a>
+                                <a href="#faq-section" class="hover:text-[var(--color-accent)] transition-colors">FAQ</a>
+                                <a href="#" onclick="alertUser('Simulación de Contacto', 'bg-sky-600')" class="hover:text-[var(--color-accent)] transition-colors">Contacto</a>
+                            </nav>
+                            <button 
+                                onclick="setView('login')"
+                                class="bg-[var(--color-accent)] text-white hover:bg-blue-500 py-1.5 px-4 rounded-lg text-sm transition-all font-semibold"
+                            >
+                                Acceder / Registro
+                            </button>
+                        </div>
+                    </header>
+
+                    <!-- Hero Section (ACTUALIZADO CON TU TEXTO) --><section id="hero" class="text-center max-w-7xl mx-auto pt-24 pb-32 px-4 sm:px-6">
+                        
+                        <h1 class="text-5xl sm:text-7xl lg:text-8xl font-black mb-6 text-[var(--color-text)] leading-tight">
+                            Cloud Capital
+                            <span class="block text-[var(--color-accent)]">Donde el Futuro se Mina y se Multiplica</span>
+                        </h1>
+                        <p class="text-lg italic text-[var(--color-subtext)] mb-10 max-w-4xl mx-auto">
+                            Gana Más. Crece Limpio. Invierte Inteligente.
+                        </p>
+                        
+                        <div class="flex flex-col sm:flex-row justify-center gap-5 mt-10">
+                            <button 
+                                onclick="setView('login')"
+                                class="bg-[var(--color-profit)] hover:bg-emerald-400 text-black font-extrabold py-4 px-10 rounded-xl shadow-xl shadow-[var(--color-profit)]/30 transition-all text-lg"
+                            >
+                                Comenzar a Invertir
+                            </button>
+                            <a 
+                                href="#plans-section"
+                                class="border border-[var(--color-subtext)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] text-[var(--color-text)] font-semibold py-4 px-10 rounded-xl transition-all text-lg flex items-center justify-center"
+                            >
+                                <i data-lucide="chevrons-down" class="w-5 h-5 mr-2"></i> Explorar Planes
+                            </a>
+                        </div>
+                    </section>
+
+                    <!-- Feature Cards Section (Nueva y más profesional) --><section class="max-w-7xl mx-auto mb-28 px-4 sm:px-6">
+                        <div class="grid md:grid-cols-3 gap-8 text-center">
+                            <div class="card landing-card p-8 shadow-2xl border-l-4 border-[var(--color-accent)]">
+                                <i data-lucide="shield-check" class="w-10 h-10 text-[var(--color-accent)] mx-auto mb-4"></i>
+                                <h3 class="text-xl font-bold mb-2 text-[var(--color-text)]">Máxima Seguridad</h3>
+                                <p class="text-[var(--color-subtext)] text-sm">Tecnología de custodia en carteras frías y encriptación de nivel bancario.</p>
+                            </div>
+                            <div class="card landing-card p-8 shadow-2xl border-l-4 border-[var(--color-profit)]">
+                                <i data-lucide="leaf" class="w-10 h-10 text-[var(--color-profit)] mx-auto mb-4"></i>
+                                <h3 class="text-xl font-bold mb-2 text-[var(--color-text)]">Rendimiento Sostenible</h3>
+                                <p class="text-[var(--color-subtext)] text-sm">Operaciones respaldadas por energía limpia para un impacto ambiental positivo.</p>
+                            </div>
+                            <div class="card landing-card p-8 shadow-2xl border-l-4 border-yellow-500">
+                                <i data-lucide="bar-chart-3" class="w-10 h-10 text-yellow-500 mx-auto mb-4"></i>
+                                <h3 class="text-xl font-bold mb-2 text-[var(--color-text)]">Transparencia Total</h3>
+                                <p class="text-[var(--color-subtext)] text-sm">Acceso a métricas en tiempo real y reportes auditables de nuestras operaciones.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Plans Section (REDESIGNADO) --><section id="plans-section" class="max-w-6xl mx-auto mb-28 px-4 sm:px-6">
+                        <h2 class="text-4xl font-bold text-center text-[var(--color-text)] mb-4">Estructura de Inversión</h2>
+                        <p class="text-center text-[var(--color-subtext)] text-lg mb-12">Descubre los planes que potencian tu capital. El rendimiento se ajusta a tu nivel de inversión.</p>
+                        
+                        <div class="grid md:grid-cols-3 gap-8">
+                            
+                            <!-- Card 1: Cloud Startup (PLAN ESTÁNDAR ACTUALIZADO) -->
+                            <div class="card p-8 rounded-3xl border-t-4 border-gray-500 hover:shadow-2xl hover:shadow-gray-500/20 transition-all transform hover:-translate-y-1 landing-card">
+                                <div class="text-4xl mb-4 text-gray-400">📊</div>
+                                <h3 class="text-2xl font-bold mb-2 text-gray-400">Plan Estándar</h3>
+                                <p class="text-[var(--color-subtext)] mb-6 text-sm">Inversión pasiva en infraestructura cloud con retornos conservadores.</p>
+                                <div class="text-4xl font-extrabold text-[var(--color-text)] mb-4 leading-none">
+                                    <span class="text-xl font-normal text-[var(--color-subtext)]">Desde </span> 0.75% <span class="text-xl font-normal text-[var(--color-subtext)]">Semanal</span>
+                                </div>
+                                <div class="text-4xl font-extrabold text-[var(--color-text)] mb-4 leading-none">
+                                    <span class="text-xl font-normal text-[var(--color-subtext)]">Hasta </span> 6.0% <span class="text-xl font-normal text-[var(--color-subtext)]">Mensual</span>
+                                </div>
+                                <p class="text-[var(--color-text)] mb-6 text-sm font-semibold">Mínimo: $50.00 USD. </p>
+                                <button 
+                                    onclick="setView('login')"
+                                    class="bg-gray-600 text-white font-bold py-3 px-5 rounded-xl w-full hover:bg-gray-700 transition-all shadow-md"
+                                >
+                                    Elegir Plan
+                                </button>
+                            </div>
+
+                            <!-- Card 2: Crypto Energy (Destacado y MENSAJE AMARILLO ELIMINADO) -->
+                            <div class="card p-8 rounded-3xl border-t-4 border-[var(--color-profit)] hover:shadow-2xl hover:shadow-[var(--color-profit)]/30 transition-all transform hover:-translate-y-1 scale-105 landing-card">
+                                <div class="text-4xl mb-4 text-[var(--color-profit)]">⚡</div>
+                                <h3 class="text-2xl font-bold mb-2 text-[var(--color-profit)]">Crypto Energy <span class="text-sm font-semibold text-white bg-[var(--color-profit)] px-2 py-0.5 rounded-full ml-2">POPULAR</span></h3>
+                                <p class="text-[var(--color-subtext)] mb-6 text-sm">Rendimiento dinámico proveniente de la minería digital sostenible.</p>
+                                <div class="text-4xl font-extrabold text-[var(--color-text)] mb-8">
+                                    <span class="text-2xl font-black text-[var(--color-profit)]">0.5% - 2.0%</span>
+                                    <span class="text-xl font-normal text-[var(--color-subtext)]"> Diario</span>
+                                </div>
+                                <!-- MENSAJE AMARILLO ELIMINADO -->
+                                
+                                <button 
+                                    onclick="setView('login')"
+                                    class="bg-[var(--color-profit)] hover:bg-emerald-400 text-black font-extrabold py-3 px-5 rounded-xl w-full transition-all shadow-xl shadow-[var(--color-profit)]/40"
+                                >
+                                    Ver Mi Rendimiento
+                                </button>
+                            </div>
+
+                            <!-- Card 3: Programa de Embajadores (Nuevo Foco: Partnership) -->
+                            <div class="card p-8 rounded-3xl border-t-4 border-[var(--color-accent)] hover:shadow-2xl hover:shadow-[var(--color-accent)]/30 transition-all transform hover:-translate-y-1 landing-card">
+                                <div class="text-4xl mb-4 text-[var(--color-accent)]">🤝</div>
+                                <h3 class="text-2xl font-bold mb-2 text-[var(--color-accent)]">Cloud Partnership</h3>
+                                <p class="text-[var(--color-subtext)] mb-6 text-sm">Programa de afiliados corporativos con comisiones.</p>
+                                <div class="text-4xl font-extrabold text-[var(--color-text)] mb-4">10% <span class="text-xl font-normal text-[var(--color-subtext)]">Comisión Directa</span></div>
+                                <p class="text-[var(--color-text)] mb-6 text-sm font-semibold">Beneficios por referir nuevos inversores.</p>
+                                <button 
+                                    onclick="setView('login')"
+                                    class="bg-[var(--color-accent)] text-white font-bold py-3 px-5 rounded-xl w-full hover:bg-blue-500 transition-all shadow-md"
+                                >
+                                    Únete al Programa
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- FAQ Section --><section id="faq-section" class="max-w-4xl mx-auto mb-20 px-4 sm:px-6">
+                        <h2 class="text-4xl font-bold text-center text-[var(--color-text)] mb-10">Preguntas Frecuentes</h2>
+                        <div class="space-y-4">
+                            ${faqs.map((faq, i) => `
+                                <details 
+                                    key=${i} 
+                                    class="landing-card bg-transparent border border-[#374151] rounded-xl p-4 transition-all duration-300 group hover:border-[var(--color-accent)]"
+                                >
+                                    <summary class="cursor-pointer text-lg font-semibold text-[var(--color-text)] flex justify-between items-center py-1">
+                                        ${faq.question}
+                                        <span class="text-[var(--color-accent)] text-xl transform group-open:rotate-45 transition-transform duration-300">
+                                            +
+                                        </span>
+                                    </summary>
+                                    <p class="mt-3 text-[var(--color-subtext)] leading-relaxed border-t border-[#374151] pt-3 text-sm">${faq.answer}</p>
+                                </details>
+                            `).join('')}
+                        </div>
+                    </section>
+
+                    <!-- Contact/CTA Section --><section class="max-w-4xl mx-auto text-center card p-12 rounded-3xl shadow-2xl shadow-blue-900/40 border border-[#374151] mb-20">
+                        <h3 class="text-3xl font-bold mb-4 text-[var(--color-text)]">Inicia tu Inversión Hoy</h3>
+                        <p class="text-lg text-[var(--color-subtext)] mb-8">Únete a la plataforma que combina la rentabilidad con la sostenibilidad.</p>
+                        <button 
+                            onclick="setView('login')"
+                            class="bg-[var(--color-accent)] hover:bg-blue-500 text-white font-bold py-3 px-10 rounded-xl shadow-lg shadow-blue-700/30 transition-all text-lg"
+                        >
+                            Crear Cuenta
+                        </button>
+                    </section>
+
+                    <!-- Footer --><footer class="text-center text-xs text-[#6B7280] py-8 border-t border-[#1F2937] max-w-7xl mx-auto px-4 sm:px-6">
+                        <p>© 2025 Cloud Capital | Investment Group | Todos los derechos reservados.</p>
+                    </footer>
+                </div>
+            `;
+            return landingHtml;
+        }
+
+
+        // Función auxiliar para renderizar la barra lateral del Dashboard/User Panel
+        function renderDashboardSidebar() {
+            const adminLink = (currentLoggedInUserEmail === ADMIN_EMAIL || currentLoggedInUserEmail === 'subadmin@cc.com') ? `
+                <a href="#" onclick="setView('adminPanel')" class="nav-link p-3 rounded-xl transition duration-150 ${currentView === 'adminPanel' ? 'active' : ''}" title="Panel Admin">
+                    <i data-lucide="shield-half" class="w-6 h-6 mx-auto text-[var(--color-admin)]"></i>
+                </a>
+            ` : '';
+
+            return `
+                <aside class="w-20 sidebar p-4 flex flex-col items-center border-r border-[#1F2937]">
+                    <!-- Logotipo C.C. -->
+                    <div class="mb-8 text-2xl font-black text-[var(--color-accent)] mt-2">CC</div>
+                    <div class="space-y-6 flex flex-col flex-grow">
+                        <!-- Ítems de navegación -->
+                        <a href="#" onclick="setView('dashboard')" class="nav-link p-3 rounded-xl transition duration-150 ${currentView === 'dashboard' ? 'active' : ''}" title="Dashboard">
+                            <i data-lucide="layout-dashboard" class="w-6 h-6 mx-auto"></i>
+                        </a>
+                        <a href="#" onclick="setView('investmentClasses')" class="nav-link p-3 rounded-xl transition duration-150 ${currentView === 'investmentClasses' ? 'active' : ''}" title="Clases de Inversión">
+                            <i data-lucide="layers-3" class="w-6 h-6 mx-auto"></i>
+                        </a>
+                        <a href="#" onclick="alertUser('Simulación de Portafolio', 'bg-sky-600')" class="nav-link p-3 rounded-xl transition duration-150" title="Portafolio">
+                            <i data-lucide="layers" class="w-6 h-6 mx-auto"></i>
+                        </a>
+                        <a href="#" onclick="alertUser('Simulación de Cuenta', 'bg-sky-600')" class="nav-link p-3 rounded-xl transition duration-150" title="Cuenta">
+                            <i data-lucide="user" class="w-6 h-6 mx-auto"></i>
+                        </a>
+                        ${adminLink} 
+                    </div>
+                    <button onclick="handleLogout()" class="nav-link p-3 rounded-xl transition duration-150 mt-auto bg-red-600 hover:bg-red-500" title="Cerrar Sesión">
+                            <i data-lucide="log-out" class="w-6 h-6 mx-auto text-white"></i>
+                    </button>
+                </aside>
+            `;
+        }
+
+        // --- 7. VISTA DEL DASHBOARD (Usuario Regular) ---
+        function renderDashboard() {
+            // Obtener los datos del usuario logueado para el dashboard
+            const userData = getUserData();
+            if (!userData) {
+                return '<div class="text-center text-red-500 p-8">Error: No se encontraron datos de usuario.</div>';
+            }
+            
+            // Determinar si es un usuario regular o el admin (para fines de simulación)
+            const isRegularUser = currentLoggedInUserEmail === DASHBOARD_EMAIL;
+            
+            // Obtener la clase actual del usuario
+            const userClassData = getUserClass(currentLoggedInUserEmail);
+            
+            return `
+                <div id="dashboard-container" class="flex min-h-screen">
+                    <!-- 1. BARRA DE NAVEGACIÓN LATERAL MINIMALISTA -->
+                    ${renderDashboardSidebar()}
+
+                    <!-- 2. CONTENIDO PRINCIPAL --><main class="flex-grow p-4 sm:p-8 overflow-y-auto">
+                        <div class="max-w-7xl mx-auto">
+                            
+                            <!-- Saludo corto y status -->
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-[#1F2937] pb-4">
+                                <h2 class="text-3xl font-extrabold text-[var(--color-text)] flex items-center mb-3 sm:mb-0">
+                                    Resumen Global. 
+                                    <span class="text-xl ml-4 text-[var(--color-subtext)] font-medium">Hola, ${isRegularUser ? 'Zeky' : userData.name}.</span>
+                                </h2>
+                                
+                                <!-- BOTÓN INTERACTIVO DE CLASE -->
+                                <button onclick="setView('investmentClasses')" class="class-button flex items-center space-x-2 py-2 px-4 rounded-lg text-sm font-bold transition-all ${userClassData.color}">
+                                    <i data-lucide="${userClassData.icon}" class="w-4 h-4"></i>
+                                    <span>CLASE ${userClassData.name}: ${userClassData.dailyProfit} Diario</span>
+                                    <i data-lucide="chevron-right" class="w-4 h-4 ml-1 text-gray-500"></i>
+                                </button>
+
+                            </div>
+                            
+                            <div class="flex flex-col lg:flex-row gap-8">
+                                
+                                <!-- PANEL CENTRAL: BALANCE TOTAL (Foco en Datos) --><section class="flex-grow lg:w-3/5 space-y-6">
+                                    
+                                    <!-- CARD PRINCIPAL: BALANCE TOTAL --><div class="card main-balance-card p-6 rounded-xl relative overflow-hidden">
+                                        
+                                        <!-- SPARKLINE DE CRECIMIENTO EN EL FONDO --><div class="absolute bottom-0 left-0 right-0 h-full opacity-30 z-0">
+                                            <canvas id="sparkline-chart" class="sparkline h-full"></canvas>
+                                        </div>
+                                        
+                                        <!-- Contenedor Principal de Datos (Z-index 10) -->
+                                        <div class="z-10 relative">
+                                            <p class="text-sm font-medium text-[var(--color-subtext)] mb-3 uppercase">Balance Total de la Cartera (USDT)</p>
+                                            
+                                            <div class="flex items-end justify-between border-b border-[#374151] pb-4 mb-4">
+                                                <h3 class="text-5xl sm:text-7xl font-black leading-none text-[var(--color-text)] data-metric">
+                                                    <span class="text-4xl sm:text-5xl mr-1 text-[var(--color-accent)] font-extrabold">$</span> 
+                                                    <span id="total-usdt-display" class="text-[var(--color-accent)]">0.00</span> 
+                                                    <span class="text-[var(--color-text)] text-3xl font-extrabold ml-1">USD</span>
+                                                </h3>
+                                                
+                                                <!-- Precio BTC en directo -->
+                                                <div class="text-right flex flex-col items-end">
+                                                    <span class="text-xs font-semibold text-[var(--color-subtext)]">BTC/USD Live:</span>
+                                                    <div class="flex items-center justify-end">
+                                                        <i id="price-arrow" data-lucide="chevrons-right" class="w-4 h-4 mr-1 text-gray-400 transition-transform duration-300"></i>
+                                                        <span class="text-lg font-black transition-colors duration-300 data-metric" id="current-btc-price">${formatPrice(userData.btcPriceUSDT)}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- SECCIÓN PROFIT/BTC -->
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <!-- PROFIT -->
+                                                <div>
+                                                    <p class="text-xs font-medium text-[var(--color-subtext)]">Ganancia Total</p>
+                                                    <div class="flex items-center space-x-1 mt-1">
+                                                        <i data-lucide="arrow-up-right" class="w-5 h-5 text-[var(--color-profit)]"></i>
+                                                        <h3 class="text-xl font-black text-[var(--color-profit)] data-metric" id="profit-usdt-display">+ $0.00</h3>
+                                                    </div>
+                                                    <p class="text-sm text-[var(--color-subtext)]" id="gain-percent">+0.00% Rendimiento</p>
+                                                </div>
+                                                
+                                                <!-- BALANCE EN BTC -->
+                                                <div class="text-right">
+                                                    <p class="text-xs font-medium text-[var(--color-subtext)]">Equivalente BTC</p>
+                                                    <div class="flex items-center justify-end space-x-1 mt-1">
+                                                        <i data-lucide="bitcoin" class="w-5 h-5 text-yellow-500"></i>
+                                                        <span class="font-black text-xl text-[var(--color-text)] data-metric" id="total-btc-display">0.0000000 BTC</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                        </div>
+                                    </div>
+
+                                    <!-- SECCIÓN DE ACCIONES/ESTADÍSTICAS (3 columnas) -->
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        
+                                        <!-- MONEDERO CAPITAL INVERTIDO -->
+                                        <div class="card card-small p-4 rounded-xl border-l-4 border-[var(--color-accent)]">
+                                            <div class="flex justify-between items-center mb-2">
+                                                <h3 class="text-sm font-bold text-[var(--color-text)]">CAPITAL INICIAL</h3>
+                                                <i data-lucide="wallet" class="w-4 h-4 text-[var(--color-accent)]"></i>
+                                            </div>
+                                            <p class="text-2xl font-black text-[var(--color-text)] mb-1 data-metric" id="capital-usdt-display">$${formatUSDT(userData.capitalUSDT)}</p>
+                                            <p class="text-xs text-[var(--color-subtext)] mb-3" id="capital-btc-display">Capital base USDT</p>
+                                            <button onclick="showDepositModal('selection')" class="bg-[#374151] hover:bg-gray-600 text-[var(--color-text)] font-medium py-1.5 px-3 rounded-lg transition duration-200 text-xs w-full">
+                                                AÑADIR (+)
+                                            </button>
+                                        </div>
+
+                                        <!-- RENDIMIENTO DISPONIBLE -->
+                                        <div class="card card-small p-4 rounded-xl border-l-4 border-[var(--color-profit)]">
+                                            <div class="flex justify-between items-center mb-2">
+                                                <h3 class="text-sm font-bold text-[var(--color-text)]">PROFIT DISPONIBLE</h3>
+                                                <i data-lucide="piggy-bank" class="w-4 h-4 text-[var(--color-profit)]"></i>
+                                            </div>
+                                            <p class="text-2xl font-black text-[var(--color-profit)] mb-1 data-metric" id="available-profit-usdt-display">$0.00</p>
+                                            <p class="text-xs text-[var(--color-subtext)] mb-3" id="available-profit-btc-display">En BTC de profit</p>
+                                            <div class="flex gap-2">
+                                                <button onclick="showModal('reinvestModal'); calculateReinvestment();" class="bg-[var(--color-profit)] hover:bg-emerald-400 text-black font-bold py-1.5 rounded-lg transition duration-200 text-xs flex-grow">
+                                                    REINVERTIR
+                                                </button>
+                                                <button onclick="showModal('withdrawModal'); calculateWithdrawal();" class="bg-red-600 hover:bg-red-500 text-white font-bold py-1.5 rounded-lg transition duration-200 text-xs flex-grow">
+                                                    RETIRAR
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- TASA SEMANAL ESTIMADA -->
+                                        <div class="card card-small p-4 rounded-xl border-l-4 border-sky-500">
+                                            <div class="flex justify-between items-center mb-2">
+                                                <h3 class="text-sm font-bold text-[var(--color-text)]">TASA SEMANAL</h3>
+                                                <i data-lucide="trending-up" class="w-4 h-4 text-sky-500"></i>
+                                            </div>
+                                            <p class="text-2xl font-black text-sky-400 mb-1 data-metric" id="weekly-percent">+7.5%</p>
+                                            <p class="text-xs text-[var(--color-subtext)] mb-3" id="weekly-usdt">Ganancia esperada USD</p>
+                                            <a href="#" class="bg-gray-600 hover:bg-gray-500 text-[var(--color-text)] font-medium py-1.5 rounded-lg transition duration-200 text-xs w-full text-center inline-block">
+                                                Ver Proyecciones
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                </section>
+                                
+                                <!-- 3. BARRA LATERAL DERECHA (Status Cards + Activity Feed) --><aside class="lg:w-2/5 lg:max-w-xs space-y-6 pt-0 lg:pt-0">
+
+                                    <!-- CARD: FEED DE ACTIVIDAD GLOBAL EN TIEMPO REAL --><div class="card p-4 rounded-xl shadow-lg border-l-4 border-[var(--color-profit)]">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <h4 class="font-bold text-lg text-[var(--color-profit)]">Movimiento Global Live</h4>
+                                            <i data-lucide="zap" class="w-5 h-5 text-[var(--color-profit)] animate-pulse"></i>
+                                        </div>
+                                        
+                                        <div id="activity-feed" class="activity-feed-container text-xs text-[var(--color-text)]">
+                                            <ul id="feed-list" class="activity-feed-list space-y-2">
+                                                <!-- Los elementos de actividad se insertarán aquí por JavaScript --></ul>
+                                        </div>
+                                    </div>
+
+                                    <!-- CARD: REQUISITOS PLATINO (La Meta Exclusiva) --><div class="card p-4 rounded-xl border-l-4 border-gray-400">
+                                        <h4 class="font-bold text-lg mb-4 text-gray-400">Progreso a Nivel <span class="text-sky-300">PLATINO</span></h4>
+                                        <p class="text-xs text-gray-500 mb-4">Meta para un rendimiento de **2.0% diario**.</p>
+                                        <ul class="text-sm space-y-3">
+                                            <li>
+                                                <div class="flex justify-between items-center mb-1">
+                                                    <span class="text-[var(--color-subtext)]">Cartera Mínima ($1,500 USD)</span>
+                                                    <span class="text-[var(--color-profit)] font-bold" id="platinum-status-usd">COMPLETADO</span>
+                                                </div>
+                                                <div class="w-full bg-gray-700 rounded-full h-1.5">
+                                                    <div class="bg-[var(--color-profit)] h-1.5 rounded-full" style="width: 100%" id="platinum-progress-usd"></div>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="flex justify-between items-center mb-1">
+                                                    <span class="text-[var(--color-subtext)]">Patrocinados Activos (Mín. 5)</span>
+                                                    <span class="text-red-500 font-bold" id="platinum-status-referral">3/5</span>
+                                                </div>
+                                                <div class="w-full bg-gray-700 rounded-full h-1.5">
+                                                    <div class="bg-red-500 h-1.5 rounded-full" style="width: 60%" id="platinum-progress-referral"></div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                        <p class="text-xs text-gray-500 mt-4">Mantén tu enfoque. La élite te espera en Platino.</p>
+                                    </div>
+                                    
+                                </aside>
+                                
+                            </div>
+                            
+                            <!-- HISTORIAL DE TRANSACCIONES (Tabla limpia) --><div class="card p-6 rounded-xl mt-8 max-w-7xl mx-auto">
+                                <h3 class="text-xl font-semibold mb-4 text-[var(--color-text)]">Registro de Transacciones</h3>
+                                
+                                <div class="overflow-x-auto rounded-lg">
+                                    <table class="min-w-full divide-y divide-gray-700 transaction-table">
+                                        <thead class="bg-gray-700">
+                                            <tr>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[var(--color-subtext)] uppercase tracking-wider">Fecha</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[var(--color-subtext)] uppercase tracking-wider">Tipo / Referencia</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[var(--color-subtext)] uppercase tracking-wider">Monto (BTC)</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[var(--color-subtext)] uppercase tracking-wider">Valor (USD)</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-[var(--color-subtext)] uppercase tracking-wider">Detalle</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-700">
+                                            <!-- Filas de ejemplo --><tr class="hover:bg-gray-800 transition">
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-subtext)]">28 Sep 2025</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-[var(--color-profit)]">Rendimiento (Contrato #003)</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-profit)] font-black data-metric">+0.0000050 BTC</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-profit)] font-black data-metric">≈ 0.54 USD</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                    <button onclick="showTXID('TXID-999ZZZ')" class="text-[var(--color-accent)] hover:text-blue-400 underline">Ver TXID</button>
+                                                </td>
+                                            </tr>
+                                            <tr class="hover:bg-gray-800 transition">
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-subtext)]">20 Sep 2025</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-sky-400">Reinversión / Contrato #003</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-sky-400 font-black data-metric">+0.0005000 BTC</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-profit)] font-black data-metric">≈ 54.01 USD</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                    <button onclick="showTXID('TXID-777YYY')" class="text-[var(--color-accent)] hover:text-blue-400 underline">Ver TXID</button>
+                                                </td>
+                                            </tr>
+                                            <tr class="hover:bg-gray-800 transition">
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-subtext)]">01 Sep 2025</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-[var(--color-accent)]">Depósito Inicial / Contrato #001</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-accent)] font-black data-metric">+0.0032400 BTC</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-profit)] font-black data-metric">≈ 350.00 USD</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                    <button onclick="showTXID('TXID-123ABC')" class="text-[var(--color-accent)] hover:text-blue-400 underline">Ver TXID</button>
+                                                </td>
+                                            </tr>
+                                            
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        
+                        <!-- FOOTER SIMPLE --><footer class="text-center text-xs text-gray-500 pt-8 mt-10">
+                            <span class="text-[var(--color-accent)] font-semibold">Cloud Capital Investment Group</span> &copy; 2025. Plataforma de Inversión.
+                        </footer>
+                    </main>
+                    
+                    <!-- MODALES (depositModal, withdrawModal, reinvestModal) -->
+                    <!-- MODAL DEPOSITO (Estructura Dinámica) -->
+                    <div id="depositModal" class="modal fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+                        <!-- REDUCCIÓN DEL TAMAÑO: max-w-lg cambiado a max-w-md -->
+                        <div class="card w-full max-w-md p-6 rounded-xl shadow-2xl bg-[var(--color-secondary)]"> 
+                            <div class="flex justify-between items-center border-b border-gray-600 pb-3 mb-4">
+                                <h3 id="depositModalTitle" class="text-2xl font-bold text-[var(--color-text)]">Seleccionar Tipo de Depósito</h3>
+                                <button onclick="hideModal('depositModal')" class="text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
+                            </div>
+                            
+                            <!-- Contenido Inyectado por JS: renderDepositModalContent() -->
+                            <div id="depositModalContent">
+                                <!-- Contenido dinámico aquí -->
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- MODAL RETIRAR -->
+                    <div id="withdrawModal" class="modal fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+                        <div class="card w-full max-w-lg p-6 rounded-xl shadow-2xl bg-[var(--color-secondary)]">
+                            <div class="flex justify-between items-center border-b border-gray-600 pb-3 mb-4">
+                                <h3 class="text-2xl font-bold text-[var(--color-text)]">Retirar Ganancias</h3>
+                                <button onclick="hideModal('withdrawModal')" class="text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
+                            </div>
+                            
+                            <p class="mb-4 text-sm text-gray-400">Balance Disponible: 
+                                <span class="font-bold text-btc" id="available-balance">0.0000000 BTC</span> / 
+                                <span class="font-bold text-[var(--color-profit)]" id="available-balance-usdt">~0.00 USD</span>
+                            </p>
+
+                            <label for="amount" class="block text-sm font-medium mb-1 text-[var(--color-text)]">Monto a Retirar (BTC)</label>
+                            <input type="number" id="amount" step="0.0000001" placeholder="Ej: 0.0050000" class="w-full p-3 mb-4 bg-gray-800 border border-gray-700 rounded-xl text-[var(--color-text)] focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] focus:outline-none">
+
+                            <label for="address" class="block text-sm font-medium mb-1 text-[var(--color-text)]">Dirección de Billetera BTC Externa</label>
+                            <input type="text" id="address" placeholder="bc1q..." class="w-full p-3 mb-6 bg-gray-800 border border-gray-700 rounded-xl text-[var(--color-text)] focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] focus:outline-none">
+
+                            <div class="p-3 bg-gray-700/50 rounded-xl mb-6 text-sm border border-gray-600/50">
+                                <p class="flex justify-between"><span>Comisión de Red (BTC):</span> <span class="font-semibold text-red-400 data-metric">0.0001000 BTC</span></p>
+                                <p class="flex justify-between mt-2 font-bold"><span>Monto Neto a Recibir:</span> <span class="text-[var(--color-profit)] data-metric" id="net-receive">0.0000000 BTC</span></p>
+                            </div>
+
+                            <button onclick="alertUser('¡Retiro simulado con éxito!', 'bg-green-600'); hideModal('withdrawModal');" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl transition duration-200 shadow-lg shadow-red-700/50">
+                                Confirmar Retiro
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- MODAL REINVERTIR -->
+                    <div id="reinvestModal" class="modal fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+                        <div class="card w-full max-w-lg p-6 rounded-xl shadow-2xl bg-[var(--color-secondary)]">
+                            <div class="flex justify-between items-center border-b border-gray-600 pb-3 mb-4">
+                                <h3 class="text-2xl font-bold text-[var(--color-text)]">Reinversión de Ganancias</h3>
+                                <button onclick="hideModal('reinvestModal')" class="text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
+                            </div>
+                            
+                            <p class="mb-4 text-sm text-sky-400 bg-gray-800 p-3 rounded-xl">
+                                Cada reinversión inicia un **nuevo contrato** optimizando su tasa de rendimiento.
+                            </p>
+
+                            <p class="mb-4 text-sm text-gray-400">Ganancias disponibles para reinversión: <span class="font-bold text-btc" id="available-profit">0.0000000 BTC</span></p>
+
+                            <label for="reinvest-amount" class="block text-sm font-medium mb-1 text-[var(--color-text)]">Monto a Reinvertir (BTC)</label>
+                            <input type="number" id="reinvest-amount" step="0.0000001" placeholder="Ej: 0.0050000" class="w-full p-3 mb-4 bg-gray-800 border border-gray-700 rounded-xl text-[var(--color-text)] focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] focus:outline-none">
+
+                            <div class="p-3 bg-gray-700/50 rounded-xl mb-6 text-sm border border-gray-600/50">
+                                <p class="flex justify-between font-bold"><span>Nuevo Capital de Contrato:</span> <span class="text-[var(--color-profit)] data-metric" id="new-contract-value">0.0000000 BTC</span></p>
+                                <p class="text-xs text-gray-400 mt-1">Este monto será acreditado como un nuevo capital de inversión.</p>
+                            </div>
+
+                            <!-- Botón ajustado a Verde (Profit Action) --><button onclick="alertUser('¡Reinversión simulada con éxito!', 'bg-green-600'); hideModal('reinvestModal');" class="w-full bg-[var(--color-profit)] hover:bg-emerald-400 text-black font-bold py-3 rounded-xl transition duration-200 shadow-lg shadow-emerald-400/50">
+                                Confirmar Reinversión
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // --- 8. VISTA DEL PANEL DE ADMINISTRACIÓN (Gestión de Usuarios) ---
+
+        function renderAdminPanel() {
+            // Contenido de la barra lateral (Se reutiliza la misma lógica)
+            const tasksCount = getPendingTasksCount();
+            const superTasksCount = getSuperAdminTasksCount();
+            
+            const tasksLink = `
+                <a href="#" onclick="setView('tasksPanel')" class="nav-link relative p-3 rounded-xl transition duration-150 ${currentView === 'tasksPanel' || currentView === 'taskDetail' ? 'tasks-active' : ''}" title="Tareas Pendientes">
+                    <i data-lucide="list-checks" class="w-6 h-6 mx-auto"></i>
+                    ${tasksCount > 0 ? `<span class="task-count-badge">${tasksCount}</span>` : ''}
+                </a>
+            `;
+            
+            const adminPanelLink = `
+                <a href="#" onclick="setView('adminPanel')" class="nav-link p-3 rounded-xl transition duration-150 ${currentView === 'adminPanel' ? 'active' : ''}" title="Panel Admin">
+                    <i data-lucide="shield-half" class="w-6 h-6 mx-auto text-[var(--color-admin)]"></i>
+                </a>
+            `;
+            
+            // Nuevo link para tareas pre-aprobadas (Super Admin Check)
+            const superAdminTasksLink = `
+                <a href="#" onclick="setView('superAdminTasks')" class="nav-link relative p-3 rounded-xl transition duration-150 ${currentView === 'superAdminTasks' ? 'super-tasks-active' : ''}" title="Depósitos Pre-Aprobados">
+                    <i data-lucide="shield-check" class="w-6 h-6 mx-auto text-[var(--color-super-admin)]"></i>
+                    ${superTasksCount > 0 ? `<span class="task-count-badge super-task-count-badge">${superTasksCount}</span>` : ''}
+                </a>
+            `;
+            
+            // Solo el Super Admin (admin@cloudcapital.com) ve las tareas pre-aprobadas
+            const isSuperAdmin = currentLoggedInUserEmail === ADMIN_EMAIL;
+            const superAdminTasksHtml = isSuperAdmin ? superAdminTasksLink : '';
+
+            return `
+                <div id="admin-container" class="flex min-h-screen">
+                    <!-- 1. BARRA DE NAVEGACIÓN LATERAL MINIMALISTA (ADMIN) --><aside class="w-20 sidebar p-4 flex flex-col items-center border-r border-[#1F2937]">
+                        <div class="mb-8 text-2xl font-black text-[var(--color-admin)] mt-2">CC</div>
+                        <div class="space-y-6 flex flex-col flex-grow">
+                            ${adminPanelLink}
+                            ${tasksLink}
+                            ${superAdminTasksHtml} <!-- Nuevo Botón -->
+                        </div>
+                        <button onclick="handleLogout()" class="nav-link p-3 rounded-xl transition duration-150 mt-auto bg-red-600 hover:bg-red-500" title="Cerrar Sesión">
+                            <i data-lucide="log-out" class="w-6 h-6 mx-auto text-white"></i>
+                        </button>
+                    </aside>
+
+                    <!-- 2. CONTENIDO PRINCIPAL DEL PANEL ADMIN --><main class="flex-grow p-4 sm:p-8 overflow-y-auto">
+                        <div class="max-w-7xl mx-auto">
+                            <h2 class="text-4xl font-extrabold text-[var(--color-admin)] mb-8 flex items-center">
+                                <i data-lucide="cog" class="w-8 h-8 mr-3"></i> Panel de Administración (Gestión de Saldo)
+                            </h2>
+                            
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                                <!-- TARJETA DE BÚSQUEDA Y SELECCIÓN --><div class="lg:col-span-1 card p-6 rounded-xl border-t-4 border-[var(--color-accent)]">
+                                    <h3 class="text-xl font-bold mb-4 text-[var(--color-text)]">1. Buscar Usuario</h3>
+                                    <input type="email" id="admin-search-email" placeholder="Email del usuario (ej: andres@gmail.com)" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-[var(--color-text)] focus:ring-[var(--color-accent)] focus:border-[var(--color-accent)] focus:outline-none mb-4" value="${selectedUserForAdmin ? selectedUserForAdmin.email : ''}">
+                                    <button onclick="searchUserForAdmin()" class="w-full bg-[var(--color-accent)] hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition duration-200">
+                                        Buscar y Seleccionar
+                                    </button>
+                                </div>
+
+                                <!-- TARJETA DE MODIFICACIÓN DE SALDO --><div class="lg:col-span-2 card p-6 rounded-xl border-t-4 border-[var(--color-profit)]">
+                                    <h3 class="text-xl font-bold mb-4 text-[var(--color-text)]">2. Modificar Saldo del Usuario</h3>
+                                    
+                                    <div id="admin-user-display" class="bg-gray-800 p-4 rounded-lg mb-4 text-center text-[var(--color-subtext)]">
+                                        Selecciona un usuario para editar su saldo.
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label for="admin-balance-amount" class="block text-sm font-medium mb-1 text-[var(--color-text)]">Monto USD a Sumar/Restar</label>
+                                            <input type="number" id="admin-balance-amount" step="1.00" value="10.00" placeholder="Ej: 50.00" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-[var(--color-text)] focus:ring-[var(--color-profit)] focus:border-[var(--color-profit)] focus:outline-none">
+                                        </div>
+                                        <div>
+                                            <label for="admin-operation-type" class="block text-sm font-medium mb-1 text-[var(--color-text)]">Operación</label>
+                                            <select id="admin-operation-type" class="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-[var(--color-text)] focus:ring-[var(--color-profit)] focus:border-[var(--color-profit)] focus:outline-none appearance-none">
+                                                <option value="add">Sumar Saldo (+)</option>
+                                                <option value="subtract">Restar Saldo (-)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <button onclick="applyBalanceChange()" id="admin-apply-btn" disabled class="w-full bg-gray-600 text-white font-bold py-3 rounded-lg mt-6 transition duration-200 cursor-not-allowed">
+                                        Aplicar Cambio de Saldo
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- TABLA DE USUARIOS ACTIVOS --><div class="card p-6 rounded-xl">
+                                <h3 class="text-xl font-bold mb-4 text-[var(--color-text)]">Tabla de Usuarios Activos (Simulación)</h3>
+                                <div class="overflow-x-auto rounded-lg">
+                                    <table class="min-w-full divide-y divide-gray-700 transaction-table">
+                                        <thead class="bg-gray-700">
+                                            <tr>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-[var(--color-subtext)] uppercase tracking-wider">Nombre</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-[var(--color-subtext)] uppercase tracking-wider">Email</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-[var(--color-subtext)] uppercase tracking-wider">Capital USD</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-[var(--color-subtext)] uppercase tracking-wider">Balance Total USD</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-[var(--color-subtext)] uppercase tracking-wider">Acción</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="admin-users-table" class="divide-y divide-gray-700">
+                                            ${Object.values(simulatedUsers)
+                                                .filter(user => user.id.startsWith('USER-')) // Sólo mostrar usuarios reales
+                                                .map(user => `
+                                                <tr class="hover:bg-gray-800 transition ${selectedUserForAdmin && selectedUserForAdmin.email === user.email ? 'bg-blue-900/50' : ''}">
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-[var(--color-text)]">${user.name}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-subtext)]">${user.email}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-[var(--color-accent)]">$${formatUSDT(user.capitalUSDT)}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-[var(--color-profit)]">$${formatUSDT(user.currentBalanceUSDT)}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                                        <button onclick="selectUserForAdmin('${user.email}')" class="text-[var(--color-accent)] hover:text-blue-400 font-medium text-xs">Seleccionar</button>
+                                                    </td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-4">Nota: El saldo se actualiza directamente en el código JavaScript simulado. Reiniciar la página restablecerá el estado.</p>
+                            </div>
+
+                        </div>
+                    </main>
+                </div>
+            `;
+        }
+
+        // --- 9. VISTA DEL PANEL DE TAREAS (Listado de Sub-Admin/Admin) ---
+        
+        function renderTasksPanel() {
+            const tasksCount = getPendingTasksCount();
+            const superTasksCount = getSuperAdminTasksCount();
+            
+            const tasksLink = `
+                <a href="#" onclick="setView('tasksPanel')" class="nav-link relative p-3 rounded-xl transition duration-150 ${currentView === 'tasksPanel' || currentView === 'taskDetail' ? 'tasks-active' : ''}" title="Tareas Pendientes">
+                    <i data-lucide="list-checks" class="w-6 h-6 mx-auto"></i>
+                    ${tasksCount > 0 ? `<span class="task-count-badge">${tasksCount}</span>` : ''}
+                </a>
+            `;
+            
+            const adminPanelLink = `
+                <a href="#" onclick="setView('adminPanel')" class="nav-link p-3 rounded-xl transition duration-150 ${currentView === 'adminPanel' ? 'active' : ''}" title="Panel Admin">
+                    <i data-lucide="shield-half" class="w-6 h-6 mx-auto text-[var(--color-admin)]"></i>
+                </a>
+            `;
+            
+            // Nuevo link para tareas pre-aprobadas (Super Admin Check)
+            const superAdminTasksLink = `
+                <a href="#" onclick="setView('superAdminTasks')" class="nav-link relative p-3 rounded-xl transition duration-150 ${currentView === 'superAdminTasks' ? 'super-tasks-active' : ''}" title="Depósitos Pre-Aprobados">
+                    <i data-lucide="shield-check" class="w-6 h-6 mx-auto text-[var(--color-super-admin)]"></i>
+                    ${superTasksCount > 0 ? `<span class="task-count-badge super-task-count-badge">${superTasksCount}</span>` : ''}
+                </a>
+            `;
+            
+            // Solo el Super Admin (admin@cloudcapital.com) ve las tareas pre-aprobadas
+            const isSuperAdmin = currentLoggedInUserEmail === ADMIN_EMAIL;
+            const superAdminTasksHtml = isSuperAdmin ? superAdminTasksLink : '';
+
+            // Filtrar tareas pendientes (Estado 'Pendiente') y ordenarlas por fecha (más reciente primero)
+            const pendingTasks = simulatedTasks
+                .filter(task => task.status === 'Pendiente')
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            // Filtrar tareas completadas
+            const completedTasks = simulatedTasks
+                .filter(task => task.status === 'Completada')
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            return `
+                <div id="tasks-container" class="flex min-h-screen">
+                    <!-- 1. BARRA DE NAVEGACIÓN LATERAL MINIMALISTA (ADMIN) --><aside class="w-20 sidebar p-4 flex flex-col items-center border-r border-[#1F2937]">
+                        <div class="mb-8 text-2xl font-black text-[var(--color-admin)] mt-2">CC</div>
+                        <div class="space-y-6 flex flex-col flex-grow">
+                            ${adminPanelLink}
+                            ${tasksLink}
+                            ${superAdminTasksHtml}
+                        </div>
+                        <button onclick="handleLogout()" class="nav-link p-3 rounded-xl transition duration-150 mt-auto bg-red-600 hover:bg-red-500" title="Cerrar Sesión">
+                            <i data-lucide="log-out" class="w-6 h-6 mx-auto text-white"></i>
+                        </button>
+                    </aside>
+
+                    <!-- 2. CONTENIDO PRINCIPAL DEL PANEL DE TAREAS --><main class="flex-grow p-4 sm:p-8 overflow-y-auto">
+                        <div class="max-w-7xl mx-auto">
+                            <h2 class="text-4xl font-extrabold text-[var(--color-danger)] mb-8 flex items-center">
+                                <i data-lucide="list-checks" class="w-8 h-8 mr-3"></i> Tareas Pendientes (${pendingTasks.length})
+                                <span class="text-xl ml-4 text-[var(--color-subtext)] font-semibold">${isSuperAdmin ? '(Sub-Admin Review)' : '(Mi Tarea)'}</span>
+                            </h2>
+                            
+                            <!-- LISTADO DE TAREAS PENDIENTES --><div class="space-y-4 mb-12">
+                                ${pendingTasks.length === 0 ? `
+                                    <div class="card p-6 text-center text-[var(--color-profit)] border-t-4 border-[var(--color-profit)]">
+                                        <p class="text-xl font-bold">¡Todas las tareas al día!</p>
+                                        <p class="text-sm text-[var(--color-subtext)] mt-2">No hay depósitos manuales ni retiros pendientes de revisión.</p>
+                                    </div>
+                                ` : pendingTasks.map(task => `
+                                    <div class="card p-5 flex flex-col md:flex-row justify-between items-start md:items-center rounded-xl border-l-4 ${task.type === 'Liquidación Total' ? 'border-red-600' : task.type.includes('Depósito Manual') ? 'border-yellow-500' : 'border-red-500'} transition duration-200 hover:shadow-xl">
+                                        
+                                        <div class="flex-grow space-y-1 mb-3 md:mb-0">
+                                            <div class="flex items-center space-x-2">
+                                                <span class="text-sm font-bold uppercase ${task.type === 'Liquidación Total' ? 'text-red-600' : task.type.includes('Depósito Manual') ? 'text-yellow-400' : 'text-red-400'}">${task.type}</span>
+                                                <span class="text-xs text-gray-500">| ID: ${task.id}</span>
+                                                ${task.type.includes('Depósito Manual') && !isSuperAdmin ? `<span class="text-xs font-semibold text-gray-500 border border-gray-600 px-2 py-0.5 rounded-full">Requiere Pre-Aprobación</span>` : ''}
+                                            </div>
+                                            <h3 class="text-2xl font-black text-[var(--color-text)]">$${formatUSDT(task.amountUSD)} USD</h3>
+                                            <p class="text-sm text-[var(--color-subtext)] truncate">
+                                                Usuario: <span class="font-semibold text-[var(--color-text)]">${task.userEmail}</span> 
+                                                <span class="ml-3 text-xs">Ref: ${task.reference.substring(0, 30)}...</span>
+                                            </p>
+                                            <p class="text-xs text-gray-500 mt-1">Recibido: ${task.date}</p>
+                                        </div>
+                                        
+                                        <button onclick="goToTaskDetail(${task.id})" class="bg-[var(--color-danger)] hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition duration-200 text-sm flex items-center shadow-lg shadow-red-700/30">
+                                            <i data-lucide="arrow-right-circle" class="w-4 h-4 mr-2"></i> Procesar Tarea
+                                        </button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            
+                            <!-- HISTORIAL DE TAREAS COMPLETADAS --><h3 class="text-3xl font-bold text-[var(--color-text)] mb-6 mt-12 border-t border-gray-700 pt-6">Historial de Tareas Completadas (${completedTasks.length})</h3>
+                            
+                            <div class="overflow-x-auto rounded-lg">
+                                <table class="min-w-full divide-y divide-gray-700 transaction-table">
+                                    <thead class="bg-gray-700">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-[var(--color-subtext)] uppercase tracking-wider">Tipo</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-[var(--color-subtext)] uppercase tracking-wider">Monto USD</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-[var(--color-subtext)] uppercase tracking-wider">Usuario</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-[var(--color-subtext)] uppercase tracking-wider">Referencia</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-[var(--color-subtext)] uppercase tracking-wider">Completado el</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-700">
+                                        ${completedTasks.map(task => `
+                                            <tr class="hover:bg-gray-800 transition">
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-400">${task.type}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-[var(--color-profit)]">$${formatUSDT(task.amountUSD)}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-subtext)]">${task.userEmail}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${task.reference.substring(0, 30)}...</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-[var(--color-profit)] font-medium">${task.date}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- FOOTER SIMPLE --><footer class="text-center text-xs text-gray-500 pt-8 mt-10">
+                            <span class="text-[var(--color-admin)] font-semibold">Cloud Capital Admin Task Center</span> &copy; 25.
+                        </footer>
+                    </main>
+                </div>
+            `;
+        }
+        
+        // --- 10. NUEVA VISTA: PANEL DE TAREAS PRE-APROBADAS (SUPER ADMIN) ---
+        function renderSuperAdminTasksPanel() {
+            const tasksCount = getPendingTasksCount();
+            const superTasksCount = getSuperAdminTasksCount();
+            
+            const tasksLink = `
+                <a href="#" onclick="setView('tasksPanel')" class="nav-link relative p-3 rounded-xl transition duration-150 ${currentView === 'tasksPanel' ? 'tasks-active' : ''}" title="Tareas Pendientes">
+                    <i data-lucide="list-checks" class="w-6 h-6 mx-auto"></i>
+                    ${tasksCount > 0 ? `<span class="task-count-badge">${tasksCount}</span>` : ''}
+                </a>
+            `;
+            
+            const adminPanelLink = `
+                <a href="#" onclick="setView('adminPanel')" class="nav-link p-3 rounded-xl transition duration-150 ${currentView === 'adminPanel' ? 'active' : ''}" title="Panel Admin">
+                    <i data-lucide="shield-half" class="w-6 h-6 mx-auto text-[var(--color-admin)]"></i>
+                </a>
+            `;
+            
+            const superAdminTasksLink = `
+                <a href="#" onclick="setView('superAdminTasks')" class="nav-link relative p-3 rounded-xl transition duration-150 ${currentView === 'superAdminTasks' || currentView === 'taskDetail' ? 'super-tasks-active' : ''}" title="Depósitos Pre-Aprobados">
+                    <i data-lucide="shield-check" class="w-6 h-6 mx-auto text-[var(--color-super-admin)]"></i>
+                    ${superTasksCount > 0 ? `<span class="task-count-badge super-task-count-badge">${superTasksCount}</span>` : ''}
+                </a>
+            `;
+            
+            // Filtrar sólo depósitos en estado 'Pre-aprobada'
+            const preApprovedDeposits = simulatedTasks
+                .filter(task => task.status === 'Pre-aprobada' && task.type.includes('Depósito Manual'))
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            return `
+                <div id="super-tasks-container" class="flex min-h-screen">
+                    <!-- 1. BARRA DE NAVEGACIÓN LATERAL MINIMALISTA (ADMIN) --><aside class="w-20 sidebar p-4 flex flex-col items-center border-r border-[#1F2937]">
+                        <div class="mb-8 text-2xl font-black text-[var(--color-admin)] mt-2">CC</div>
+                        <div class="space-y-6 flex flex-col flex-grow">
+                            ${adminPanelLink}
+                            ${tasksLink}
+                            ${superAdminTasksLink} <!-- Botón Activo -->
+                        </div>
+                        <button onclick="handleLogout()" class="nav-link p-3 rounded-xl transition duration-150 mt-auto bg-red-600 hover:bg-red-500" title="Cerrar Sesión">
+                            <i data-lucide="log-out" class="w-6 h-6 mx-auto text-white"></i>
+                        </button>
+                    </aside>
+
+                    <!-- 2. CONTENIDO PRINCIPAL DEL PANEL DE SUPER TAREAS --><main class="flex-grow p-4 sm:p-8 overflow-y-auto">
+                        <div class="max-w-7xl mx-auto">
+                            <h2 class="text-4xl font-extrabold text-[var(--color-super-admin)] mb-8 flex items-center">
+                                <i data-lucide="shield-check" class="w-8 h-8 mr-3"></i> Depósitos Pre-Aprobados (${preApprovedDeposits.length})
+                                <span class="text-xl ml-4 text-[var(--color-subtext)] font-semibold">(Aprobación Final)</span>
+                            </h2>
+                            
+                            <!-- LISTADO DE TAREAS PRE-APROBADAS --><div class="space-y-4 mb-12">
+                                ${preApprovedDeposits.length === 0 ? `
+                                    <div class="card p-6 text-center text-[var(--color-profit)] border-t-4 border-[var(--color-profit)]">
+                                        <p class="text-xl font-bold">No hay depósitos pre-aprobados pendientes de mi revisión.</p>
+                                        <p class="text-sm text-[var(--color-subtext)] mt-2">Los sub-admins están esperando nuevas tareas.</p>
+                                    </div>
+                                ` : preApprovedDeposits.map(task => `
+                                    <div class="card p-5 flex flex-col md:flex-row justify-between items-start md:items-center rounded-xl border-l-4 border-[var(--color-super-admin)] transition duration-200 hover:shadow-xl hover:shadow-[var(--color-super-admin)]/20">
+                                        
+                                        <div class="flex-grow space-y-1 mb-3 md:mb-0">
+                                            <div class="flex items-center space-x-2">
+                                                <span class="text-sm font-bold uppercase text-[var(--color-super-admin)]">${task.type} (Final Review)</span>
+                                                <span class="text-xs text-gray-500">| ID: ${task.id}</span>
+                                            </div>
+                                            <h3 class="text-2xl font-black text-[var(--color-text)]">$${formatUSDT(task.amountUSD)} USD</h3>
+                                            <p class="text-sm text-[var(--color-subtext)] truncate">
+                                                Usuario: <span class="font-semibold text-[var(--color-text)]">${task.userEmail}</span> 
+                                                <span class="ml-3 text-xs">Ref: ${task.reference.substring(0, 30)}...</span>
+                                            </p>
+                                            <p class="text-sm text-yellow-400 mt-1 font-semibold">
+                                                Aprobado por: ${simulatedUsers[task.approvedByAdmin]?.name || task.approvedByAdmin}
+                                            </p>
+                                            <p class="text-xs text-gray-500">Pre-aprobado el: ${task.date}</p>
+                                        </div>
+                                        
+                                        <button onclick="goToTaskDetail(${task.id})" class="bg-[var(--color-super-admin)] hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200 text-sm flex items-center shadow-lg shadow-[var(--color-super-admin)]/40">
+                                            <i data-lucide="arrow-right-circle" class="w-4 h-4 mr-2"></i> Revisar y Aprobar
+                                        </button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            
+                            <!-- Historial de tareas completadas (puedes añadir aquí un filtro de depósitos si lo necesitas) -->
+                            <!-- Por simplicidad, se omite el historial en esta vista para centrarse en la cola de trabajo -->
+
+                        </div>
+                        
+                        <!-- FOOTER SIMPLE --><footer class="text-center text-xs text-gray-500 pt-8 mt-10">
+                            <span class="text-[var(--color-admin)] font-semibold">Cloud Capital Super Admin Center</span> &copy; 25.
+                        </footer>
+                    </main>
+                </div>
+            `;
+        }
+
+        // --- 11. VISTA DE DETALLE DE TAREA (taskDetail) ---
+
+        function renderTaskDetail() {
+            const task = getTaskData(currentTaskId);
+            
+            if (!task) {
+                return '<div class="text-center text-red-500 p-8">Error: Tarea no encontrada o ID inválido.</div>';
+            }
+            
+            // Obtener los datos del usuario relacionado (si existe)
+            const user = simulatedUsers[task.userEmail];
+            // Si el usuario no existe en la simulación local, creamos un objeto genérico.
+            const userData = user ? { ...user, class: getUserClass(user.email) } : { 
+                name: 'Usuario Desconocido', 
+                email: task.userEmail, 
+                id: 'N/A', 
+                username: 'N/A',
+                currentBalanceUSDT: 0, 
+                capitalUSDT: 0,
+                class: { name: 'INVÁLIDA', color: 'text-gray-500' }
+            };
+
+            let liquidationData = null;
+            if (task.type === 'Liquidación Total' && task.liquidationDetails) {
+                 liquidationData = calculateLiquidation(task);
+            }
+            
+            const tasksCount = getPendingTasksCount();
+            const superTasksCount = getSuperAdminTasksCount();
+            
+            const tasksLink = `
+                <a href="#" onclick="setView('tasksPanel')" class="nav-link relative p-3 rounded-xl transition duration-150 ${currentView === 'tasksPanel' || task.status === 'Pendiente' ? 'tasks-active' : ''}" title="Tareas Pendientes">
+                    <i data-lucide="list-checks" class="w-6 h-6 mx-auto"></i>
+                    ${tasksCount > 0 ? `<span class="task-count-badge">${tasksCount}</span>` : ''}
+                </a>
+            `;
+            
+            const adminPanelLink = `
+                <a href="#" onclick="setView('adminPanel')" class="nav-link p-3 rounded-xl transition duration-150 ${currentView === 'adminPanel' ? 'active' : ''}" title="Panel Admin">
+                    <i data-lucide="shield-half" class="w-6 h-6 mx-auto text-[var(--color-admin)]"></i>
+                </a>
+            `;
+            
+            const superAdminTasksLink = `
+                <a href="#" onclick="setView('superAdminTasks')" class="nav-link relative p-3 rounded-xl transition duration-150 ${currentView === 'superAdminTasks' || task.status === 'Pre-aprobada' ? 'super-tasks-active' : ''}" title="Depósitos Pre-Aprobados">
+                    <i data-lucide="shield-check" class="w-6 h-6 mx-auto text-[var(--color-super-admin)]"></i>
+                    ${superTasksCount > 0 ? `<span class="task-count-badge super-task-count-badge">${superTasksCount}</span>` : ''}
+                </a>
+            `;
+            
+            const isSuperAdmin = currentLoggedInUserEmail === ADMIN_EMAIL;
+            const superAdminTasksHtml = isSuperAdmin ? superAdminTasksLink : '';
+            
+            // Colores basados en el estado
+            let taskColor;
+            let actionColor;
+            let actionText;
+            let backView = 'tasksPanel';
+            
+            if (task.status === 'Pre-aprobada') {
+                taskColor = 'border-[var(--color-super-admin)]';
+                actionColor = 'bg-[var(--color-profit)] hover:bg-emerald-500'; // Super Admin Aprueba (verde)
+                actionText = 'APROBAR DEPÓSITO FINAL';
+                backView = 'superAdminTasks';
+            } else if (task.type.includes('Depósito Manual')) {
+                taskColor = 'border-yellow-500';
+                actionColor = 'bg-[var(--color-accent)] hover:bg-blue-500'; // Sub-Admin Pre-Aprueba (azul/accent)
+                actionText = 'PRE-APROBAR (Revisión de Sub-Admin)';
+            } else if (task.type === 'Liquidación Total') {
+                taskColor = 'border-red-600';
+                actionColor = 'bg-red-700 hover:bg-red-600';
+                actionText = 'PROCESAR LIQUIDACIÓN';
+            } else { // Retiro Pendiente
+                taskColor = 'border-red-500';
+                actionColor = 'bg-red-600 hover:bg-red-500';
+                actionText = 'PROCESAR RETIRO';
+            }
+
+            return `
+                <div id="task-detail-container" class="flex min-h-screen">
+                    <!-- 1. BARRA DE NAVEGACIÓN LATERAL MINIMALISTA (ADMIN) --><aside class="w-20 sidebar p-4 flex flex-col items-center border-r border-[#1F2937]">
+                        <div class="mb-8 text-2xl font-black text-[var(--color-admin)] mt-2">CC</div>
+                        <div class="space-y-6 flex flex-col flex-grow">
+                            ${adminPanelLink}
+                            ${tasksLink}
+                            ${superAdminTasksHtml}
+                        </div>
+                        <button onclick="handleLogout()" class="nav-link p-3 rounded-xl transition duration-150 mt-auto bg-red-600 hover:bg-red-500" title="Cerrar Sesión">
+                            <i data-lucide="log-out" class="w-6 h-6 mx-auto text-white"></i>
+                        </button>
+                    </aside>
+
+                    <!-- 2. CONTENIDO PRINCIPAL DEL DETALLE DE TAREA --><main class="flex-grow p-4 sm:p-8 overflow-y-auto">
+                        <div class="max-w-7xl mx-auto">
+                            
+                            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 border-b border-gray-700 pb-4">
+                                <h2 class="text-4xl font-extrabold text-[var(--color-text)] flex items-center mb-3 sm:mb-0">
+                                    <i data-lucide="${task.status === 'Pre-aprobada' ? 'shield-check' : (liquidationData ? 'hand-coins' : 'file-text')}" class="w-8 h-8 mr-3 ${taskColor.replace('border-', 'text-')}"></i> Procesar Tarea #<span class="${taskColor.replace('border-', 'text-')}">${task.id}</span>
+                                </h2>
+                                <button onclick="setView('${backView}')" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200 text-sm flex items-center">
+                                    <i data-lucide="chevron-left" class="w-4 h-4 mr-2"></i> Volver a ${backView === 'superAdminTasks' ? 'Pre-Aprobadas' : 'Tareas Pendientes'}
+                                </button>
+                            </div>
+
+                            <div class="grid lg:grid-cols-3 gap-8">
+                                
+                                <!-- TARJETA PRINCIPAL DE LA TAREA / PETICIÓN COMPLETA --><div class="lg:col-span-2 card p-6 rounded-xl border-t-4 ${taskColor} shadow-2xl space-y-6">
+                                    
+                                    <h3 class="text-3xl font-black text-[var(--color-text)] mb-4">Monto Solicitado: $${formatUSDT(task.amountUSD)} USD</h3>
+                                    
+                                    <div class="grid md:grid-cols-2 gap-4">
+                                        <!-- Tipo de Tarea --><div class="p-3 bg-gray-700/50 rounded-lg">
+                                            <p class="text-xs font-medium text-[var(--color-subtext)] uppercase">Tipo de Petición</p>
+                                            <p class="font-bold text-lg ${taskColor.replace('border-', 'text-')}">${task.type}</p>
+                                        </div>
+                                        <!-- Fecha Solicitud --><div class="p-3 bg-gray-700/50 rounded-lg">
+                                            <p class="text-xs font-medium text-[var(--color-subtext)] uppercase">Estado</p>
+                                            <p class="font-bold text-lg text-[var(--color-text)]">${task.status}</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- ESTADO DE PRE-APROBACIÓN (NUEVO) -->
+                                    ${task.status === 'Pre-aprobada' ? `
+                                        <div class="pt-4 border-t border-gray-700 space-y-3">
+                                            <h4 class="text-xl font-bold text-[var(--color-super-admin)]">Flujo de Doble Aprobación</h4>
+                                            <div class="p-3 rounded-lg border border-yellow-500 bg-yellow-900/30">
+                                                <p class="text-sm text-yellow-400 font-semibold">
+                                                    Aprobado por Sub-Admin: <span class="text-white">${simulatedUsers[task.approvedByAdmin]?.name || task.approvedByAdmin}</span>
+                                                </p>
+                                                <p class="text-xs text-gray-400 mt-1">Este depósito ha sido revisado, comprobado y marcado como válido por un administrador de nivel inferior. Solo requiere su Aprobación Final para ser acreditado.</p>
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                    
+                                    <!-- DESGLOSE DE LIQUIDACIÓN -->
+                                    ${liquidationData ? `
+                                        <div class="pt-4 border-t border-gray-700 space-y-3">
+                                            <h4 class="text-xl font-bold text-red-400">Desglose de Liquidación Anticipada</h4>
+                                            
+                                            <div class="flex justify-between text-sm text-[var(--color-subtext)]">
+                                                <span>Capital Inicial (${(task.liquidationDetails.initialCapital).toFixed(0)} USD) + Ganancias (${(task.liquidationDetails.totalProfit).toFixed(0)} USD)</span>
+                                                <span class="font-bold text-white">$${formatUSDT(liquidationData.totalBalance)} USD</span>
+                                            </div>
+                                            
+                                            <!-- Multas -->
+                                            <div class="bg-red-900/30 p-3 rounded-lg space-y-2 border border-red-800">
+                                                <div class="flex justify-between text-sm text-red-400 font-bold">
+                                                    <span>Multa (100% Ganancias)</span>
+                                                    <span>- $${formatUSDT(liquidationData.profitPenalty)} USD</span>
+                                                </div>
+                                                <div class="flex justify-between text-sm text-red-400 font-bold">
+                                                    <span>Multa (39% Capital Inicial)</span>
+                                                    <span>- $${formatUSDT(liquidationData.capitalPenalty)} USD</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Total Neto -->
+                                            <div class="pt-2 border-t border-gray-600">
+                                                <div class="flex justify-between text-lg font-black text-[var(--color-profit)]">
+                                                    <span>MONTO NETO A DEVOLVER</span>
+                                                    <span>$${formatUSDT(liquidationData.amountToReturn)} USD</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ` : ''}
+
+
+                                    <div class="pt-4 border-t border-gray-700 space-y-4">
+                                        
+                                        <!-- Referencia / TXID -->
+                                        <div>
+                                            <p class="text-sm font-medium text-[var(--color-subtext)]">Referencia / Destino / TXID</p>
+                                            <div class="bg-gray-800 p-3 rounded-lg flex justify-between items-center font-mono text-sm break-all">
+                                                <span class="text-[var(--color-text)]">${task.reference}</span>
+                                                <button onclick="copyToClipboard('txid-${task.id}')" class="ml-3 text-[var(--color-accent)] hover:text-blue-500 font-bold text-xs">Copiar</button>
+                                                <span id="txid-${task.id}" class="hidden">${task.reference}</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- BOTÓN VER COMPROBANTE (Sólo Depósito Manual) -->
+                                        ${task.type.includes('Depósito Manual') ? `
+                                            <div class="mt-6">
+                                                <p class="text-sm font-medium text-[var(--color-subtext)] mb-2">Verificación de Aporte:</p>
+                                                <button onclick="showProofModal('${task.proof}')" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 rounded-xl transition duration-200 text-md flex items-center justify-center shadow-lg shadow-sky-700/30">
+                                                    <i data-lucide="image-search" class="w-5 h-5 mr-3"></i> VER COMPROBANTE
+                                                </button>
+                                            </div>
+                                        ` : ''}
+
+                                        <!-- DESTINO DE PAGO (Sólo Liquidación / Retiro) -->
+                                        ${liquidationData || task.type === 'Retiro Pendiente' ? `
+                                            <div class="mt-6">
+                                                <p class="text-sm font-medium text-[var(--color-subtext)] mb-2">Destino de Pago Solicitado:</p>
+                                                <div class="bg-gray-800 p-3 rounded-lg font-mono text-sm break-all border border-green-500/50">
+                                                    <span class="text-[var(--color-profit)] font-semibold">${liquidationData ? task.liquidationDetails.destination : task.reference}</span>
+                                                </div>
+                                                <p class="text-xs text-gray-500 mt-1">Verifique la dirección/datos antes de procesar.</p>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                    
+                                    <div class="pt-6 border-t border-gray-700">
+                                        <button onclick="completeTask(${task.id})" class="w-full text-white font-bold py-3 rounded-xl transition duration-200 text-lg flex items-center justify-center shadow-lg ${actionColor} ${actionColor.includes('profit') ? 'text-black shadow-emerald-700/50' : actionColor.includes('red') ? 'shadow-red-700/50' : 'shadow-blue-700/50'}">
+                                            <i data-lucide="check-circle" class="w-5 h-5 mr-3"></i> ${actionText}
+                                        </button>
+                                        <button onclick="alertUser('Simulación de rechazo: Se requiere más información del usuario.','bg-red-800')" class="w-full text-red-500 hover:text-red-400 font-medium py-2 mt-2 rounded-xl text-sm">
+                                            Rechazar / Requerir más información
+                                        </button>
+                                    </div>
+
+                                </div>
+                                
+                                <!-- TARJETA DE INFORMACIÓN DEL USUARIO (DERECHA) --><div class="lg:col-span-1">
+                                    <div class="card p-4 rounded-xl border-l-4 border-[var(--color-admin)] bg-gray-800 shadow-md">
+                                        <div class="flex items-center space-x-3 mb-3 border-b border-gray-700 pb-3">
+                                            <i data-lucide="user-check" class="w-6 h-6 text-[var(--color-admin)]"></i>
+                                            <h4 class="font-bold text-lg text-[var(--color-text)]">Datos del Solicitante</h4>
+                                            <span class="text-xs font-bold px-2 py-1 rounded-full ${userData.class.color} bg-gray-700/50">${userData.class.name}</span>
+                                        </div>
+                                        
+                                        <div class="space-y-3 text-sm">
+                                            <p class="text-[var(--color-subtext)]">ID de Usuario: <span class="font-semibold text-[var(--color-text)]">${userData.id}</span></p>
+                                            <p class="text-[var(--color-subtext)]">Nombre: <span class="font-semibold text-[var(--color-text)]">${userData.name}</span></p>
+                                            <p class="text-[var(--color-subtext)]">Username: <span class="font-semibold text-[var(--color-text)]">${userData.username}</span></p>
+                                            <p class="text-[var(--color-subtext)]">Correo: <span class="font-semibold text-[var(--color-text)]">${userData.email}</span></p>
+                                            
+                                            <div class="border-t border-gray-700 pt-3 mt-3">
+                                                <p class="text-[var(--color-subtext)]">Capital Invertido:</p>
+                                                <p class="font-black text-xl text-[var(--color-accent)]">$${formatUSDT(userData.capitalUSDT)} USD</p>
+                                            </div>
+                                            <p class="text-[var(--color-subtext)]">Balance Total (antes de esta tarea):</p>
+                                            <p class="font-black text-xl text-[var(--color-profit)]">$${formatUSDT(userData.currentBalanceUSDT)} USD</p>
+                                        </div>
+                                        <button onclick="selectUserForAdmin('${userData.email}')" class="w-full bg-blue-700 hover:bg-blue-600 text-white font-bold py-1.5 rounded-lg mt-4 text-xs">
+                                            Ver/Editar en Gestión de Saldo
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                    
+                    <!-- MODAL VER COMPROBANTE (NUEVO) -->
+                    <div id="proofModal" class="modal fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+                        <div class="card w-full max-w-2xl p-6 rounded-xl shadow-2xl bg-[var(--color-secondary)]">
+                            <div class="flex justify-between items-center border-b border-gray-600 pb-3 mb-4">
+                                <h3 class="text-2xl font-bold text-sky-400">Comprobante de Depósito Manual</h3>
+                                <button onclick="hideModal('proofModal')" class="text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
+                            </div>
+                            <p class="text-sm text-[var(--color-subtext)] mb-4">Referencia: <span class="font-mono text-white">${task ? task.reference : 'N/A'}</span></p>
+                            
+                            <div class="bg-gray-900 p-2 rounded-lg text-center">
+                                <img id="proof-image" src="" alt="Comprobante de Transferencia" class="max-w-full h-auto mx-auto rounded-lg border border-gray-700">
+                                <p class="text-xs text-gray-500 mt-2">Imagen simulada del comprobante cargado por el usuario.</p>
+                            </div>
+
+                        </div>
+                    </div>
+                    
+                    <!-- MODALES (withdrawModal, reinvestModal) -->
+                    <!-- Estos modales se mantienen en su lugar -->
+                </div>
+            `;
+        }
+
+        // --- 12. VISTA DE CLASES DE INVERSIÓN (MODIFICADA: Segmentada y Rediseñada) ---
+
+        function renderInvestmentClasses() {
+            const currentClass = getUserClass(currentLoggedInUserEmail);
+            const userBalance = simulatedUsers[currentLoggedInUserEmail].currentBalanceUSDT;
+
+            const plans = Object.values(investmentClasses);
+            
+            // Segmentar los planes
+            const cloudPlans = plans.filter(p => p.name === 'BRONCE' || p.name === 'PLATA PREMIUM');
+            const cryptoPlans = plans.filter(p => p.name === 'BASIC / STARTER' || p.name === 'SILVER' || p.name === 'GOLD' || p.name === 'PLATINUM' || p.name === 'DIAMOND');
+
+            const renderPlanCard = (plan) => {
+                const isCurrent = plan.name === currentClass.name;
+                const isAvailable = userBalance >= plan.capitalMin || isCurrent;
+                
+                // Determinación de la siguiente clase para el upgrade
+                const allNames = Object.keys(investmentClasses);
+                const currentIndex = allNames.indexOf(plan.name);
+                let nextClass = null;
+
+                // Buscar el siguiente plan en el orden que sea distinto del actual
+                for (let i = currentIndex + 1; i < allNames.length; i++) {
+                    const nextPlan = investmentClasses[allNames[i]];
+                    if (nextPlan.name !== plan.name) {
+                        nextClass = nextPlan;
+                        break;
+                    }
+                }
+                
+                let upgradeHtml = '';
+                // Lógica de upgrade
+                if (isCurrent && nextClass) {
+                    const upgradeNeeded = Math.max(0, nextClass.capitalMin - userBalance);
+                    const upgradeFee = nextClass.capitalMin * nextClass.upgradeCostRate; 
+                    
+                    if (upgradeNeeded > 0) {
+                        upgradeHtml = `
+                            <button onclick="alertUser('¡Simulación! Invierte $${formatUSDT(upgradeNeeded)} USD más para alcanzar ${nextClass.name}', 'bg-sky-600')" 
+                                class="w-full bg-sky-600 hover:bg-sky-500 text-white font-bold py-2.5 rounded-xl transition duration-200 text-sm mt-4 flex items-center justify-center">
+                                <i data-lucide="arrow-up" class="w-4 h-4 mr-2"></i> MEJORAR A ${nextClass.name}
+                            </button>
+                            <p class="text-xs text-center text-gray-500 mt-2">Costo de mejora (Fee): $${formatUSDT(upgradeFee)} USD</p>
+                        `;
+                    } else {
+                        upgradeHtml = `
+                            <button onclick="alertUser('¡Felicidades! Ya calificas. Contáctanos para el Upgrade a ${nextClass.name}.', 'bg-green-600')" 
+                                class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-2.5 rounded-xl transition duration-200 text-sm mt-4 flex items-center justify-center">
+                                <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> CALIFICAS: MEJORAR A ${nextClass.name}
+                            </button>
+                        `;
+                    }
+                } else if (plan.name === 'DIAMOND') { 
+                    upgradeHtml = `<p class="text-sm text-center text-pink-400 mt-4 font-bold">¡Clase Máxima Alcanzada!</p>`;
+                } else if (!isAvailable) {
+                     upgradeHtml = `<p class="text-sm text-center text-red-400 mt-4 font-semibold">Capital Mínimo: $${formatUSDT(plan.capitalMin)} USD</p>`;
+                }
+                
+                // --- Lógica de Título y Contenido Personalizado ---
+                let titleHtml = '';
+                let detailLabel = 'Ganancia Diaria'; 
+                
+                const isCloudPlan = plan.name === 'BRONCE' || plan.name === 'PLATA PREMIUM';
+                const isMiningPlan = !isCloudPlan;
+
+                if (isCloudPlan) {
+                    // Planes de Nube
+                    titleHtml = `
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="${plan.icon}" class="w-6 h-6 ${plan.color}"></i>
+                            <h3 class="text-lg font-black ${plan.color} uppercase">Invierte en la Nube de Forma Pasiva</h3>
+                        </div>
+                    `;
+                    detailLabel = 'Ganancia Mensual';
+
+                } else if (isMiningPlan) {
+                    // Planes de Minería Crypto
+                    titleHtml = `
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="${plan.icon}" class="w-6 h-6 ${plan.color}"></i>
+                            <h3 class="text-2xl font-black ${plan.color}">Clase ${plan.name}</h3>
+                        </div>
+                    `;
+                    detailLabel = 'Rentabilidad Diaria (Rango)'; 
+                }
+                
+                // Cálculo del valor de la comisión mensual de mantenimiento (solo para mostrar en la tarjeta)
+                // Para Basic/Starter $100 * 8% = $8.00
+                // Para Silver se usa el rango de capital ($250 a $500), usando el valor mínimo
+                const commissionBase = isMiningPlan ? plan.capitalMin : 100; // Usamos el mínimo del plan
+                const commissionRate = parseFloat(plan.monthlyCommission);
+                const estimatedCommission = (commissionBase * commissionRate / 100);
+                
+                // Determinar el Capital Display para Minería
+                let capitalDisplay = isMiningPlan 
+                    ? `$${formatUSDT(plan.capitalMin)}` 
+                    : `$${formatUSDT(plan.capitalMin)}`; 
+
+                // Si es Silver (Mining), muestra el rango
+                if (plan.name === 'SILVER') {
+                    capitalDisplay = `$${formatUSDT(investmentClasses.SILVER.capitalMin)} – $${formatUSDT(investmentClasses.GOLD.capitalMin - 1)}`;
+                } else if (plan.name === 'DIAMOND') {
+                    capitalDisplay = `$${formatUSDT(plan.capitalMin)} o más`;
+                }
+
+
+                // Construcción de la grilla de datos
+                const dataGridHtml = `
+                    <div class="grid grid-cols-2 gap-4 text-center mt-6">
+                        
+                        <!-- Columna 1: Rentabilidad -->
+                        <div class="p-3 bg-gray-900/50 rounded-lg border border-gray-700/50">
+                            <p class="text-xl font-black ${plan.color} leading-snug">${plan.dailyProfit}</p>
+                            <p class="text-xs text-gray-400">Rentabilidad Diaria (Rango)</p>
+                        </div>
+                        
+                        <!-- Columna 2: Promedio Diario -->
+                        <div class="p-3 bg-gray-900/50 rounded-lg border border-gray-700/50">
+                            <p class="text-xl font-black text-[var(--color-profit)] leading-snug">${isMiningPlan ? plan.avgDailyProfit : 'N/A'}</p>
+                            <p class="text-xs text-gray-400">Promedio Diario</p>
+                        </div>
+
+                        <!-- Columna 3: Capital Mínimo -->
+                        <div class="p-3 bg-gray-900/50 rounded-lg border border-gray-700/50">
+                             <p class="text-sm font-black text-sky-400 leading-snug break-words">
+                                ${capitalDisplay}
+                             </p>
+                            <p class="text-xs text-gray-400">Inversión Mínima USD</p>
+                        </div>
+
+                        <!-- Columna 4: Comisión Mensual -->
+                        <div class="p-3 bg-gray-900/50 rounded-lg border border-gray-700/50">
+                            <p class="text-xl font-black text-red-400 leading-snug">${plan.monthlyCommission}%</p>
+                            <p class="text-xs text-gray-400">Comisión Mensual</p>
+                        </div>
+
+                    </div>
+                    
+                    <!-- Fila 3: Métrica de Duplicación (Doble Ancho) -->
+                    <div class="mt-4 p-3 bg-gray-900/50 rounded-lg border border-gray-700/50 text-center">
+                        <p class="text-xs text-yellow-500 uppercase font-semibold tracking-wider mb-1">Tiempo para Duplicar (Sin Reinvertir)</p>
+                        <p class="time-to-duplicate">${plan.timeToDuplicate}</p>
+                    </div>
+                `;
+
+
+                // Genera el HTML de la tarjeta
+                return `
+                    <div class="class-card p-6 rounded-2xl ${isCurrent ? 'class-current' : ''}">
+                        
+                        <div class="flex flex-col items-center justify-center text-center mb-4 border-b border-gray-700 pb-3">
+                            ${titleHtml} 
+                            <span class="text-xs font-semibold text-[var(--color-subtext)] mt-1">
+                                ${isCurrent ? 'CLASE ACTUAL' : (isCloudPlan ? 'Pasiva' : 'Minera')}
+                            </span>
+                        </div>
+                        
+                        <p class="text-sm text-[var(--color-subtext)] mb-6 text-center">${plan.desc}</p>
+                        
+                        ${dataGridHtml} 
+
+                        ${upgradeHtml}
+                        
+                    </div>
+                `;
+            };
+
+            const cloudPlansHtml = cloudPlans.map(renderPlanCard).join('');
+            // Se usa el grid de 5 para los planes crypto.
+            const cryptoPlansHtml = cryptoPlans.map(renderPlanCard).join('');
+            
+            return `
+                <div class="flex min-h-screen">
+                    <!-- 1. BARRA DE NAVEGACIÓN LATERAL MINIMALISTA -->
+                    ${renderDashboardSidebar()} 
+
+                    <!-- 2. CONTENIDO PRINCIPAL -->
+                    <main class="flex-grow p-4 sm:p-8 overflow-y-auto">
+                        <div class="max-w-7xl mx-auto">
+                            
+                            <div class="flex items-center justify-between mb-8">
+                                <h2 class="text-4xl font-extrabold text-[var(--color-text)] flex items-center">
+                                    <i data-lucide="layers-3" class="w-8 h-8 mr-3 text-sky-400"></i> Niveles de Inversión
+                                </h2>
+                                <button onclick="setView('dashboard')" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200 text-sm flex items-center">
+                                    <i data-lucide="chevron-left" class="w-4 h-4 mr-2"></i> Volver al Dashboard
+                                </button>
+                            </div>
+                            
+                            <!-- Banner de Clase Actual -->
+                            <div class="mb-12 p-6 bg-yellow-900/20 border-l-4 border-yellow-500 rounded-lg shadow-lg">
+                                <p class="font-bold text-2xl text-yellow-400">¡Actualmente eres Clase ${currentClass.name}!</p>
+                                <p class="text-sm text-[var(--color-subtext)] mt-2">Tu capital actual ($${formatUSDT(userBalance)} USD) te posiciona en esta clase. Revisa las métricas para tu siguiente nivel de crecimiento.</p>
+                            </div>
+                            
+                            <!-- SECCIÓN 1: INVERSIÓN PASIVA EN LA NUBE -->
+                            <h3 class="text-3xl font-bold text-sky-400 mb-6 mt-10 flex items-center border-b-2 border-sky-900 pb-3">
+                                <i data-lucide="cloud" class="w-6 h-6 mr-3"></i> Inversión Pasiva en la Nube
+                                <span class="text-base text-gray-500 ml-4">(Ingreso Fijo Mensual)</span>
+                            </h3>
+                            <!-- Se mantiene el grid en 2 columnas para estos dos planes -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+                                ${cloudPlansHtml}
+                            </div>
+
+                            <!-- SECCIÓN 2: INVERSIÓN EN MINERÍA CRYPTO -->
+                            <h3 class="text-3xl font-bold text-yellow-400 mb-6 mt-10 flex items-center border-b-2 border-yellow-900 pb-3">
+                                <i data-lucide="bitcoin" class="w-6 h-6 mr-3"></i> Inversión en Minería Crypto
+                                <span class="text-base text-gray-500 ml-4">(Alto Rendimiento Diario y Duplicación)</span>
+                            </h3>
+                            <!-- 5 columnas para los 5 nuevos planes de Minería -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+                                ${cryptoPlansHtml}
+                            </div>
+                            
+                            <!-- FOOTER SIMPLE --><footer class="text-center text-xs text-gray-500 pt-8 mt-10">
+                                <span class="text-[var(--color-accent)] font-semibold">Cloud Capital Investment Group</span> &copy; 2025.
+                            </footer>
+                        </div>
+                    </main>
+                </div>
+            `;
+        }
+
+        // --- 13. LÓGICA DE LA APLICACIÓN PRINCIPAL (Selector de Vistas) ---
+        function renderApp() {
+            const root = document.getElementById('app-root');
+            root.innerHTML = ''; // Limpiar contenido anterior
+            
+            let htmlContent = '';
+            
+            // Lógica para decidir qué vista renderizar
+            if (isAuthenticated) {
+                if (currentLoggedInUserEmail === ADMIN_EMAIL || currentLoggedInUserEmail === 'subadmin@cc.com') {
+                    if (currentView === 'taskDetail') {
+                        htmlContent = renderTaskDetail();
+                    } else if (currentView === 'tasksPanel') {
+                        htmlContent = renderTasksPanel();
+                    } else if (currentView === 'superAdminTasks' && currentLoggedInUserEmail === ADMIN_EMAIL) {
+                        htmlContent = renderSuperAdminTasksPanel();
+                    } else {
+                        htmlContent = renderAdminPanel();
+                    }
+                } else {
+                    // Vistas de usuario normal
+                    if (currentView === 'investmentClasses') {
+                        htmlContent = renderInvestmentClasses();
+                    } else {
+                        htmlContent = renderDashboard();
+                    }
+                }
+            } else if (currentView === 'login') {
+                htmlContent = renderAuthPage();
+            } else {
+                htmlContent = renderLandingPage();
+            }
+            
+            root.innerHTML = htmlContent;
+        }
+
+        // --- 14. CÓDIGO JAVASCRIPT: SIMULACIÓN DE DATOS EN VIVO (Dashboard User) ---
+        
+        let priceInterval;
+        let activityInterval;
+        let elements = {}; 
+
+        // Función para detener los intervalos cuando se sale del dashboard
+        function stopSimulation() {
+             clearTimeout(priceInterval);
+             clearTimeout(activityInterval);
+             priceInterval = undefined;
+             activityInterval = undefined;
+        }
+
+        // Inicialización del Dashboard
+        function initializeDashboard() {
+            // Sólo inicia simulación para el usuario principal si el user actual es el dashboard user
+            if (currentLoggedInUserEmail !== DASHBOARD_EMAIL) return; 
+            
+            elements = {
+                totalUSDT: document.getElementById('total-usdt-display'),
+                totalBTC: document.getElementById('total-btc-display'),
+                profitUSDT: document.getElementById('profit-usdt-display'),
+                gainPercent: document.getElementById('gain-percent'),
+                capitalUSDT: document.getElementById('capital-usdt-display'),
+                capitalBTCDisplay: document.getElementById('capital-btc-display'),
+                weeklyPercent: document.getElementById('weekly-percent'),
+                weeklyUSDT: document.getElementById('weekly-usdt'),
+                availableBalanceBTC: document.getElementById('available-balance'),
+                availableBalanceUSDT: document.getElementById('available-balance-usdt'), 
+                withdrawAmount: document.getElementById('amount'),
+                netReceive: document.getElementById('net-receive'),
+                reinvestAmount: document.getElementById('reinvest-amount'),
+                availableProfitBTC: document.getElementById('available-profit'),
+                availableProfitUSDTDisplay: document.getElementById('available-profit-usdt-display'),
+                availableProfitBTCDisplay: document.getElementById('available-profit-btc-display'),
+                newContractValue: document.getElementById('new-contract-value'),
+                sparklineCanvas: document.getElementById('sparkline-chart'),
+                feedList: document.getElementById('feed-list'), 
+                currentBtcPriceDisplay: document.getElementById('current-btc-price'),
+                priceArrow: document.getElementById('price-arrow'),
+                platinumStatusUsd: document.getElementById('platinum-status-usd'),
+                platinumProgressUsd: document.getElementById('platinum-progress-usd'),
+            };
+
+            const defaultUserData = simulatedUsers[DASHBOARD_EMAIL];
+            const withdrawalFee = 0.0001; 
+            
+            let simulationData = { 
+                btcPriceUSDT: defaultUserData.btcPriceUSDT,
+                capitalUSDT: defaultUserData.capitalUSDT,
+                currentBalanceUSDT: defaultUserData.currentBalanceUSDT,
+                withdrawalFee: withdrawalFee
+            };
+
+            // Cálculo inicial de BTC
+            simulationData.capitalBTC = simulationData.capitalUSDT / simulationData.btcPriceUSDT; 
+            simulationData.currentBalanceBTC = simulationData.currentBalanceUSDT / simulationData.btcPriceUSDT; 
+            
+            // Datos para el gráfico de crecimiento (sparkline)
+            const dailyGrowthData = [
+                0.000001, 0.000002, 0.000003, 0.000005, 0.000007, 0.000009, 
+                0.000011, 0.000013, 0.000015, 0.000017, 0.000019, 0.000021, 
+                0.000023, 0.000025 
+            ];
+            
+            // Simulación de Copiar al Portapapeles
+            window.copyToClipboard = function(elementId) {
+                const copyText = document.getElementById(elementId).innerText || document.getElementById(elementId).textContent;
+                try {
+                    const tempTextArea = document.createElement('textarea');
+                    tempTextArea.value = copyText;
+                    document.body.appendChild(tempTextArea);
+                    tempTextArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempTextArea);
+                    alertUser('¡Referencia copiada!', 'bg-green-600'); 
+                } catch (err) {
+                    console.error('Error al copiar: ', err);
+                    alertUser('Error al copiar la referencia.', 'bg-red-600');
+                }
+            }
+            
+            // Dibuja el gráfico minimalista (Sparkline)
+            function renderSparkline() {
+                const canvas = elements.sparklineCanvas;
+                if (!canvas) return;
+
+                const ctx = canvas.getContext('2d');
+                const data = dailyGrowthData.map(d => d * simulationData.btcPriceUSDT); 
+
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                const maxVal = Math.max(...data) * 1.1; 
+                const minVal = 0;
+                const stepX = canvas.width / (data.length - 1);
+                const rangeY = maxVal - minVal;
+
+                ctx.beginPath();
+                ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--color-accent');
+                ctx.lineWidth = 2;
+                
+                const yStart = canvas.height - ((data[0] - minVal) / rangeY) * canvas.height;
+                ctx.moveTo(0, yStart); 
+
+                for (let i = 1; i < data.length; i++) {
+                    const x = i * stepX;
+                    const y = canvas.height - ((data[i] - minVal) / rangeY) * canvas.height;
+                    ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+
+                // Relleno de área
+                ctx.lineTo(canvas.width, canvas.height);
+                ctx.lineTo(0, canvas.height);
+                ctx.closePath();
+                
+                const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                gradient.addColorStop(0, 'rgba(59, 130, 246, 0.2)'); 
+                gradient.addColorStop(1, 'rgba(59, 130, 246, 0.01)'); 
+                
+                ctx.fillStyle = gradient;
+                ctx.fill();
+            }
+            
+            // Cálculo de Retiro (Interactivo)
+            window.calculateWithdrawal = function() {
+                if (!elements.withdrawAmount || !elements.netReceive) return;
+                const amount = parseFloat(elements.withdrawAmount.value) || 0;
+                const net = amount > simulationData.withdrawalFee ? amount - simulationData.withdrawalFee : 0;
+                
+                elements.netReceive.innerText = `${net.toFixed(7)} BTC`;
+                elements.netReceive.classList.toggle('text-[var(--color-profit)]', net > 0);
+                elements.netReceive.classList.toggle('text-red-400', amount > 0 && net <= 0);
+            }
+
+            // Cálculo de Reinversión (Interactivo)
+            window.calculateReinvestment = function() {
+                 if (!elements.reinvestAmount || !elements.newContractValue) return;
+                const reinvestedAmount = parseFloat(elements.reinvestAmount.value) || 0;
+                const usdtValue = reinvestedAmount * simulationData.btcPriceUSDT;
+                
+                elements.newContractValue.innerText = `${formatBTC(reinvestedAmount)} BTC (≈ ${formatUSDT(usdtValue)} USD)`;
+                elements.newContractValue.classList.toggle('text-[var(--color-profit)]', reinvestedAmount > 0);
+            }
+            
+            // --- SIMULACIÓN DEL PRECIO DE BTC EN VIVO Y BALANCE ---
+            let currentBtcPrice = simulationData.btcPriceUSDT;
+            
+            function simulateBtcPriceChange() {
+                if (currentView !== 'dashboard') return;
+                
+                const maxPriceFluctuation = 500; 
+                const maxProfitFluctuationPerUnit = 0.0000005; 
+                
+                const priceChange = (Math.random() - 0.5) * 2 * maxPriceFluctuation;
+                const newPrice = currentBtcPrice + priceChange;
+
+                const minPrice = 1080.00; 
+                const oldPrice = currentBtcPrice;
+                currentBtcPrice = Math.max(minPrice, newPrice);
+                simulationData.btcPriceUSDT = currentBtcPrice;
+                
+                const isUp = currentBtcPrice > oldPrice;
+
+                // Actualizar Balance en BTC basado en el saldo USD del usuario simulado
+                const currentBalanceUSDT = simulatedUsers[DASHBOARD_EMAIL].currentBalanceUSDT;
+                simulationData.currentBalanceBTC = currentBalanceUSDT / currentBtcPrice;
+
+                const newBalanceDisplay = formatBTC(simulationData.currentBalanceBTC) + ' BTC';
+                
+                if (elements.totalBTC.innerText !== newBalanceDisplay) {
+                    elements.totalBTC.classList.add('btc-change-flash');
+                    setTimeout(() => elements.totalBTC.classList.remove('btc-change-flash'), 50); 
+                }
+                
+                elements.totalBTC.innerText = newBalanceDisplay;
+
+                elements.currentBtcPriceDisplay.innerText = formatPrice(currentBtcPrice);
+                
+                elements.currentBtcPriceDisplay.classList.remove('price-change-up', 'price-change-down');
+                elements.priceArrow.classList.remove('price-change-up', 'price-change-down', 'rotate-90', '-rotate-90');
+
+                if (isUp) {
+                    elements.currentBtcPriceDisplay.classList.add('price-change-up');
+                    elements.priceArrow.classList.add('price-change-up', 'rotate-90');
+                    elements.priceArrow.setAttribute('data-lucide', 'chevrons-up');
+                } else {
+                    elements.currentBtcPriceDisplay.classList.add('price-change-down');
+                    elements.priceArrow.classList.add('price-change-down', '-rotate-90');
+                    elements.priceArrow.setAttribute('data-lucide', 'chevrons-down');
+                }
+                
+                if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                    lucide.createIcons();
+                }
+
+                updateDashboardDisplay();
+
+                const delay = Math.floor(Math.random() * 450) + 50; 
+                priceInterval = setTimeout(simulateBtcPriceChange, delay);
+            }
+
+            // Función para actualizar los displays del dashboard
+            function updateDashboardDisplay() {
+                if (currentView !== 'dashboard') return;
+                
+                // Usar los datos directos del usuario simulado
+                const { currentBalanceUSDT, capitalUSDT, btcPriceUSDT } = simulatedUsers[DASHBOARD_EMAIL];
+                const totalUSDT = currentBalanceUSDT;
+                const currentBalanceBTC = totalUSDT / btcPriceUSDT;
+                
+                const calculatedProfitBTC = currentBalanceBTC - (capitalUSDT / btcPriceUSDT);
+                const profitUSDT = totalUSDT - capitalUSDT; 
+                
+                elements.totalUSDT.innerText = formatUSDT(totalUSDT);
+                
+                const weeklyRate = 7.5; 
+                const weeklyGainUSDT = totalUSDT * (weeklyRate / 100); 
+                elements.weeklyUSDT.innerText = `≈ $${formatUSDT(weeklyGainUSDT)} USD`; // Formateo mejor
+                elements.availableProfitBTCDisplay.innerText = `${formatBTC(calculatedProfitBTC)} BTC`;
+                elements.capitalBTCDisplay.innerText = `≈ ${formatBTC(capitalUSDT / btcPriceUSDT)} BTC iniciales`;
+
+
+                elements.profitUSDT.innerText = `+ $${formatUSDT(profitUSDT)}`;
+                elements.availableProfitUSDTDisplay.innerText = `$${formatUSDT(profitUSDT)}`;
+                
+                const totalReturnPercent = (profitUSDT / capitalUSDT) * 100;
+                elements.gainPercent.innerText = `+${totalReturnPercent.toFixed(2)}% Rendimiento`;
+
+                elements.availableBalanceUSDT.innerText = `~${formatUSDT(profitUSDT)} USD`;
+                elements.availableProfitBTC.innerText = `${formatBTC(calculatedProfitBTC)} BTC`;
+                elements.availableBalanceBTC.innerText = `${formatBTC(calculatedProfitBTC)} BTC`; 
+
+                // Lógica de progreso a Platino
+                const platinumTarget = 1500.00; // Corregido a capitalMin de PLATINO
+                const progress = Math.min(100, (totalUSDT / platinumTarget) * 100);
+                
+                if (elements.platinumProgressUsd && elements.platinumStatusUsd) {
+                    const isCompleted = totalUSDT >= platinumTarget;
+
+                    if (isCompleted) {
+                         elements.platinumProgressUsd.style.width = `100%`;
+                         elements.platinumProgressUsd.classList.remove('bg-red-500');
+                         elements.platinumProgressUsd.classList.add('bg-[var(--color-profit)]'); 
+                         
+                         elements.platinumStatusUsd.innerText = `COMPLETADO`;
+                         elements.platinumStatusUsd.classList.remove('text-red-500');
+                         elements.platinumStatusUsd.classList.add('text-[var(--color-profit)]'); 
+                    } else {
+                        elements.platinumProgressUsd.style.width = `${progress}%`;
+                        elements.platinumProgressUsd.classList.remove('bg-[var(--color-profit)]');
+                         elements.platinumProgressUsd.classList.add('bg-red-500'); 
+                         
+                        elements.platinumStatusUsd.innerText = `${progress.toFixed(1)}%`;
+                        elements.platinumStatusUsd.classList.remove('text-[var(--color-profit)]');
+                        elements.platinumStatusUsd.classList.add('text-red-500');
+                    }
+                }
+            }
+
+            // --- SIMULACIÓN DEL FEED DE ACTIVIDAD ---
+            const activities = [
+                { type: 'Depósito', icon: 'download', color: 'text-amber-600', range: [50, 1234] }, 
+                { type: 'Reinversión', icon: 'repeat-2', color: 'text-[var(--color-profit)]', range: [100, 800] }, 
+                { type: 'Retiro', icon: 'log-out', color: 'text-red-500', range: [200, 500] }, 
+                { type: 'Pago de Rendimiento', icon: 'trending-up', color: 'text-[var(--color-accent)]', range: [1, 50] }, 
+            ];
+
+            const users = [
+                'User_01', 'Cloud_Trader', 'Cloud_Zeky', 'BtcGuru', 'Inver_Pro', 'Fidelis88', 
+                'Oro_King', 'CC_TraderX', 'AlphaBeta', 'NeoInvestor', 'CoinHunter', 'DogeLover',
+            ];
+
+            function generateActivity() {
+                const userIndex = Math.floor(Math.random() * users.length);
+                const activityIndex = Math.floor(Math.random() * activities.length);
+                
+                const user = users[userIndex].substring(0, 3) + '***' + users[userIndex].slice(-1); 
+                const activity = activities[activityIndex];
+                
+                let amountUSDT = 0;
+
+                amountUSDT = (Math.random() * (activity.range[1] - activity.range[0]) + activity.range[0]);
+                amountUSDT = parseFloat(amountUSDT.toFixed(2));
+                const message = `${activity.type} $${formatUSDT(amountUSDT)} USD`;
+
+                return {
+                    user: user,
+                    message: message,
+                    icon: activity.icon,
+                    color: activity.color
+                };
+            }
+
+            function renderActivityItem(activity) {
+                const listItem = document.createElement('li');
+                listItem.className = 'activity-item flex items-center space-x-2 p-1 border-b border-gray-700 last:border-b-0'; 
+                
+                const iconSpan = document.createElement('span');
+                // Nota: Usamos innerHTML para los iconos lucide, ya que se renderizan después
+                iconSpan.innerHTML = `<i data-lucide="${activity.icon}" class="w-4 h-4 ${activity.color}"></i>`;
+                
+                const textSpan = document.createElement('span');
+                textSpan.className = 'truncate text-[var(--color-text)]';
+                textSpan.innerHTML = `<span class="font-semibold text-[var(--color-text)]">${activity.user}</span>: ${activity.message}`;
+
+                listItem.appendChild(iconSpan);
+                listItem.appendChild(textSpan);
+
+                return listItem;
+            }
+
+            let isActivityFeedInitialized = false;
+
+            function startActivityFeed() {
+                if (isActivityFeedInitialized) return;
+
+                // Llenar inicialmente con ~5 items
+                for (let i = 0; i < 5; i++) {
+                    elements.feedList.appendChild(renderActivityItem(generateActivity()));
+                }
+
+                const updateAndScroll = () => {
+                    if (currentView !== 'dashboard') return;
+                    
+                    const newActivity = renderActivityItem(generateActivity());
+                    elements.feedList.prepend(newActivity);
+
+                    if (elements.feedList.children.length > 8) {
+                        elements.feedList.removeChild(elements.feedList.lastChild);
+                    }
+
+                    if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                        lucide.createIcons();
+                    }
+
+                };
+
+                const updateFeed = () => {
+                    const delay = 1700; 
+                    updateAndScroll();
+                    activityInterval = setTimeout(updateFeed, delay);
+                };
+
+                updateFeed();
+                isActivityFeedInitialized = true;
+            }
+
+            // Inicialización de la Interfaz con datos actualizados
+            function initializeUI() {
+                 if (currentView !== 'dashboard') return;
+
+                const userData = simulatedUsers[DASHBOARD_EMAIL];
+                const capitalBTC = userData.capitalUSDT / userData.btcPriceUSDT;
+                
+                elements.capitalUSDT.innerText = `$${formatUSDT(userData.capitalUSDT)}`; // Quitamos USD
+                elements.capitalBTCDisplay.innerText = `≈ ${formatBTC(capitalBTC)} BTC iniciales`;
+                
+                elements.weeklyPercent.innerText = `+7.5%`;
+                
+                // Asignar listeners (sólo la primera vez)
+                if (elements.withdrawAmount && !elements.withdrawAmount.hasListener) {
+                    elements.withdrawAmount.addEventListener('input', calculateWithdrawal);
+                    elements.reinvestAmount.addEventListener('input', calculateReinvestment);
+                    elements.withdrawAmount.hasListener = true;
+                }
+
+                // Renderizar el gráfico
+                renderSparkline();
+
+                // Iniciar el Feed de Actividad Y la simulación del precio (sólo una vez)
+                if (!priceInterval) {
+                     simulateBtcPriceChange();
+                     startActivityFeed();
+                } else {
+                     updateDashboardDisplay();
+                }
+            }
+            
+            // Simulación de función para mostrar TXID (reemplaza funcionalidad de alert)
+            window.showTXID = function(txid) {
+                alertUser(`TXID copiado: ${txid}`, 'bg-sky-600');
+            }
+            
+            // Inicio de la lógica del dashboard
+            initializeUI();
+            window.addEventListener('resize', initializeUI);
+        }
+
+        // --- 15. LÓGICA DEL PANEL ADMIN (Gestión de Saldo) ---
+        // Se mantiene la lógica de admin panel, updateAdminDisplay, etc.
+
+        window.selectUserForAdmin = function(email) {
+            selectedUserForAdmin = simulatedUsers[email];
+            updateAdminDisplay();
+            alertUser(`Usuario ${selectedUserForAdmin.name} seleccionado.`, 'bg-green-600');
+            setView('adminPanel');
+        }
+        
+        window.searchUserForAdmin = function() {
+            const email = document.getElementById('admin-search-email').value.trim();
+            const user = simulatedUsers[email];
+            if (user) {
+                selectedUserForAdmin = user;
+                updateAdminDisplay();
+                alertUser(`Usuario ${user.name} encontrado y seleccionado.`, 'bg-green-600');
+                renderApp();
+            } else {
+                selectedUserForAdmin = null;
+                updateAdminDisplay();
+                alertUser(`Error: Usuario con email "${email}" no encontrado.`, 'bg-red-600');
+            }
+        }
+        
+        // Función para actualizar la UI de modificación (omitted for brevity)
+        function updateAdminDisplay() {
+            const displayEl = document.getElementById('admin-user-display');
+            const applyBtn = document.getElementById('admin-apply-btn');
+            const searchInput = document.getElementById('admin-search-email');
+
+            if (selectedUserForAdmin) {
+                displayEl.innerHTML = `
+                    <p class="text-lg font-bold text-[var(--color-text)]">${selectedUserForAdmin.name}</p>
+                    <p class="text-sm text-[var(--color-subtext)]">${selectedUserForAdmin.email}</p>
+                    <p class="text-xl font-extrabold text-[var(--color-profit)] mt-2">Saldo Actual: $${formatUSDT(selectedUserForAdmin.currentBalanceUSDT)} USD</p>
+                `;
+                displayEl.classList.remove('text-[var(--color-subtext)]');
+                displayEl.classList.add('border-l-4', 'border-[var(--color-profit)]');
+                
+                applyBtn.disabled = false;
+                applyBtn.classList.remove('bg-gray-600', 'cursor-not-allowed');
+                applyBtn.classList.add('bg-[var(--color-profit)]', 'hover:bg-emerald-400');
+                if (searchInput) searchInput.value = selectedUserForAdmin.email;
+            } else {
+                 displayEl.innerHTML = `Selecciona un usuario para editar su saldo.`;
+                 displayEl.classList.add('text-[var(--color-subtext)]');
+                 displayEl.classList.remove('border-l-4', 'border-[var(--color-profit)]');
+                 
+                 applyBtn.disabled = true;
+                 applyBtn.classList.add('bg-gray-600', 'cursor-not-allowed');
+                 applyBtn.classList.remove('bg-[var(--color-profit)]', 'hover:bg-emerald-400');
+                 if (searchInput) searchInput.value = '';
+            }
+        }
+
+        // Función para aplicar el cambio de saldo (omitted for brevity)
+        window.applyBalanceChange = function() {
+            if (!selectedUserForAdmin) {
+                alertUser('Error: Primero selecciona un usuario.', 'bg-red-600');
+                return;
+            }
+            
+            const amount = parseFloat(document.getElementById('admin-balance-amount').value);
+            const operation = document.getElementById('admin-operation-type').value;
+
+            if (isNaN(amount) || amount <= 0) {
+                alertUser('Error: Ingresa un monto válido.', 'bg-red-600');
+                return;
+            }
+            
+            let newBalance = selectedUserForAdmin.currentBalanceUSDT;
+            let newCapital = selectedUserForAdmin.capitalUSDT; // Asumimos que balance y capital van de la mano para esta demo
+            
+            const adminName = simulatedUsers[currentLoggedInUserEmail].name;
+
+            if (operation === 'add') {
+                newBalance += amount;
+                newCapital += amount; // Ajuste de capital
+                alertUser(`Se agregaron $${formatUSDT(amount)} USD a ${selectedUserForAdmin.name}.`, 'bg-green-600');
+                
+                // Simulación de Tarea de Depósito directo (para el historial)
+                simulatedTasks.push({
+                    id: Math.max(...simulatedTasks.map(t => t.id)) + 1,
+                    type: 'Depósito Manual (Admin)',
+                    userEmail: selectedUserForAdmin.email,
+                    amountUSD: amount,
+                    reference: `Ajuste manual por ${adminName}`,
+                    status: 'Completada',
+                    date: new Date().toISOString().slice(0, 19).replace('T', ' '),
+                    action: 'Ajuste Directo'
+                });
+                
+            } else if (operation === 'subtract') {
+                newBalance -= amount;
+                newCapital -= amount; // Ajuste de capital
+                alertUser(`Se restaron $${formatUSDT(amount)} USD de ${selectedUserForAdmin.name}.`, 'bg-red-600');
+            }
+            
+            // Actualizar la "base de datos" simulada
+            simulatedUsers[selectedUserForAdmin.email].currentBalanceUSDT = parseFloat(newBalance.toFixed(2));
+            simulatedUsers[selectedUserForAdmin.email].capitalUSDT = parseFloat(newCapital.toFixed(2));
+            
+            // Re-seleccionar para que se actualice la vista de usuario actual
+            selectedUserForAdmin = simulatedUsers[selectedUserForAdmin.email];
+            
+            // Re-renderizar la interfaz para que la tabla y el display se actualicen
+            renderApp();
+        }
+        
+        window.showProofModal = function(imageUrl) {
+            const proofImageEl = document.getElementById('proof-image');
+            if (proofImageEl && imageUrl) {
+                proofImageEl.src = imageUrl;
+                showModal('proofModal');
+            } else {
+                alertUser('Comprobante no disponible.', 'bg-gray-600');
+            }
+        }
+
+
+        // --- 16. INICIO DE LA APLICACIÓN AL CARGAR LA PÁGINA ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initBackgroundCanvas(); // Primero inicia el fondo
+            renderApp(); // Luego renderiza la aplicación
+        });
+
+    </script>
+</head>
+<body class="min-h-screen">
+    <!-- CANVAS DE FONDO -->
+    <canvas id="background-canvas"></canvas>
+
+    <!-- Contenedor Principal de la Aplicación -->
+    <div id="app-root"></div>
+</body>
+</html>

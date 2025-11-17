@@ -1,0 +1,216 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Variables CSS exactas de tu plantilla */
+:root {
+  /* Colores base (Modo Nocturno) */
+  --color-primary: #0A0A18; /* Azul Oscuro Profundo / Fondo base */
+  --color-secondary: #1F2937; /* Gris Oscuro Suave / Cards */
+  --color-accent: #3B82F6; /* Azul Corporativo / Acento principal */
+  --color-profit: #10B981; /* Verde Esmeralda / Ganancia */
+  --color-text: #F9FAFB; /* Blanco puro para contraste */
+  --color-subtext: #9CA3AF; /* Gris de soporte */
+  --color-danger: #EF4444; /* Rojo */
+  --color-admin: #FBBF24; /* Amarillo Ámbar para Admin */
+  --color-super-admin: #F97316; /* Naranja para Super Admin Tasks */
+}
+
+/* Estilos base del body (igual que tu plantilla) */
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--color-primary);
+  color: var(--color-text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative; 
+  z-index: 0; 
+}
+
+/* Canvas de fondo (igual que tu plantilla) */
+#background-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+/* Componentes layer - Cards (igual que tu plantilla) */
+@layer components {
+  .card { 
+    @apply bg-cc-card border border-cc-border rounded-xl transition-all duration-200 ease-in-out;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  }
+  
+  .card:hover { 
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6); 
+    @apply border-gray-500;
+  }
+
+  .card-small:hover { 
+    transform: none; 
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); 
+  }
+
+  /* Main balance card (igual que tu plantilla) */
+  .main-balance-card {
+    @apply bg-cc-card border-2 border-cc-border;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+  }
+
+  /* Links de navegación (igual que tu plantilla) */
+  .nav-link { 
+    @apply text-cc-subtext font-medium transition-all duration-150;
+  }
+  
+  .nav-link.tasks-active { 
+    @apply bg-cc-danger text-white;
+  }
+  
+  .nav-link.super-tasks-active { 
+    @apply bg-cc-super-admin text-white;
+  }
+  
+  .nav-link.active:not(.tasks-active):not(.super-tasks-active) { 
+    @apply bg-cc-accent text-white;
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+  }
+  
+  .nav-link:not(.active):hover { 
+    @apply bg-cc-secondary text-gray-100;
+  }
+
+  /* Sidebar (igual que tu plantilla) */
+  .sidebar { 
+    @apply bg-cc-primary border-cc-secondary; 
+  }
+
+  /* Métricas de datos (igual que tu plantilla) */
+  .data-metric { 
+    font-weight: 900; 
+    letter-spacing: -0.05em; 
+  }
+
+  /* Modales (igual que tu plantilla) */
+  .modal { 
+    background-color: rgba(10, 10, 24, 0.98); 
+  }
+
+  .modal input, .modal select { 
+    @apply bg-cc-secondary border-cc-border text-cc-text;
+  }
+
+  /* Sparkline */
+  .sparkline { 
+    height: 60px; 
+    width: 100%; 
+    opacity: 0.5; 
+    filter: drop-shadow(0 0 3px var(--color-accent)); 
+  }
+
+  /* Badges de tareas (igual que tu plantilla) */
+  .task-count-badge {
+    @apply absolute top-1 right-1 bg-cc-danger text-white text-xs font-bold leading-none py-0.5 px-1.5 rounded-full min-w-[18px] text-center;
+  }
+  
+  .super-task-count-badge { 
+    @apply bg-cc-super-admin; 
+  }
+
+  /* Insignia GOLD (igual que tu plantilla) */
+  .gold-premium-badge { 
+    @apply bg-cc-card text-cc-admin font-semibold border border-cc-admin py-1 px-2.5 rounded-lg;
+  }
+
+  /* Estilos de clases de inversión (igual que tu plantilla) */
+  .class-card {
+    @apply bg-cc-card border border-cc-border relative overflow-hidden transition-all duration-300;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  }
+  
+  .class-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.7);
+  }
+  
+  .class-card::before {
+    content: '';
+    @apply absolute top-0 left-0 w-full h-full opacity-0 transition-opacity duration-300;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(16, 185, 129, 0.02) 100%);
+  }
+  
+  .class-card:hover::before {
+    @apply opacity-100;
+  }
+
+  .class-current {
+    @apply border-2 border-cc-profit;
+    box-shadow: 0 0 25px rgba(16, 185, 129, 0.4);
+    background-color: #151F2D;
+  }
+
+  /* Landing page estilos (igual que tu plantilla) */
+  .landing-header { 
+    background-color: rgba(10, 10, 24, 0.8); 
+    backdrop-filter: blur(10px);
+    @apply sticky top-0 z-20 border-b border-cc-secondary;
+  }
+  
+  .landing-card {
+    background-color: #151F2D;
+    @apply border border-cc-border rounded-2xl;
+  }
+
+  /* Animaciones de cambio de precio (igual que tu plantilla) */
+  .price-change-up { 
+    @apply text-cc-profit transition-all duration-100;
+  }
+  
+  .price-change-down { 
+    @apply text-cc-danger transition-all duration-100;
+  }
+  
+  .rotate-90 { 
+    transform: rotate(0deg); 
+    @apply transition-transform duration-300; 
+  }
+  
+  .-rotate-90 { 
+    transform: rotate(180deg); 
+    @apply transition-transform duration-300; 
+  }
+
+  /* Tabla de transacciones (igual que tu plantilla) */
+  .transaction-table thead { 
+    @apply bg-gray-700; 
+  }
+  
+  .transaction-table tbody tr:hover { 
+    @apply bg-gray-800; 
+  }
+
+  /* Feed de actividad (igual que tu plantilla) */
+  .activity-item {
+    @apply py-1.5 border-b border-dashed border-cc-secondary last:border-b-0;
+  }
+
+  /* Tiempo de duplicación (igual que tu plantilla) */
+  .time-to-duplicate {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #FFD700; /* Dorado para destacar el retorno */
+  }
+}
+
+/* Utilidades personalizadas */
+@layer utilities {
+  .text-btc { 
+    color: #F7931A; 
+  }
+  
+  .btc-change-flash {
+    @apply animate-pulse;
+  }
+}
