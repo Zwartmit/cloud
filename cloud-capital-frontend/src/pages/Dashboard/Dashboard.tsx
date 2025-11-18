@@ -1,6 +1,6 @@
 import { LogOut } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
-import { Card, Button } from '@/components/ui'
+import { Button } from '@/components/ui'
 
 // Dashboard placeholder
 export const Dashboard = () => {

@@ -3,11 +3,7 @@ import { persist } from 'zustand/middleware'
 import { User, AppView, LoginCredentials } from '@/types'
 import { 
   simulatedUsers, 
-  authCredentials, 
-  ADMIN_EMAIL, 
-  DASHBOARD_EMAIL,
-  getPendingTasksCount,
-  getSuperAdminTasksCount 
+  authCredentials
 } from '@/data/mockData'
 
 interface AuthState {
@@ -47,7 +43,7 @@ export const useAuthStore = create<AuthState>()(
         const { email, password } = credentials
         
         // Verificar credenciales (exacto de tu lógica)
-        const expectedPassword = authCredentials[email]
+        const expectedPassword = authCredentials[email as keyof typeof authCredentials]
         if (!expectedPassword || expectedPassword !== password) {
           return { success: false, message: 'Credenciales incorrectas. Intenta de nuevo.' }
         }

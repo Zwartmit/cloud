@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { ArrowLeft, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'
-import { Button, Card, FormField, Input } from '@/components/ui'
-import { cn } from '@/utils/cn'
+import { Button, Card, FormField } from '@/components/ui'
 
 // Login Page
 export const LoginPage = () => {

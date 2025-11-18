@@ -4,7 +4,6 @@ import {
   TrendingUp, 
   Users, 
   ChevronDown,
-  Star,
   Check
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/authStore'

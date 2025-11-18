@@ -1,5 +1,5 @@
 // Datos simulados
-import { User, InvestmentClass, Transaction, LiquidationDetails, ManualDepositData } from '@/types'
+import { User, InvestmentClass, Transaction, LiquidationDetails } from '@/types'
 
 // Constantes
 export const ADMIN_EMAIL = 'admin@cloudcapital.com'

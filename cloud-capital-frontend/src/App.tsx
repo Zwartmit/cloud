@@ -1,5 +1,3 @@
-import { useEffect } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import { AnimatedBackground } from '@/components/layout/AnimatedBackground'
 import { LandingPage } from '@/pages/Landing/LandingPage'
@@ -9,23 +7,11 @@ import { AdminPanel } from '@/pages/Admin/AdminPanel'
 import { SuperAdminDashboard } from '@/pages/Admin/SuperAdminDashboard'
 import { TasksList } from '@/pages/Tasks/TasksList'
 import { TaskDetail } from '@/pages/Tasks/TaskDetail'
-import { SuperAdminTasks } from '@/pages/Tasks/SuperAdminTasks'
 import { InvestmentClassesPage } from '@/pages/InvestmentClasses/InvestmentClassesPage'
 
 function App() {
   const { isAuthenticated, currentView, user } = useAuthStore()
 
-  // Reinicializar iconos de Lucide cuando cambie la vista (igual que tu plantilla)
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      // @ts-ignore - lucide se carga globalmente
-      if (typeof window.lucide !== 'undefined' && window.lucide.createIcons) {
-        window.lucide.createIcons()
-      }
-    }, 50)
-    
-    return () => clearTimeout(timeoutId)
-  }, [currentView])
 
   // Determinar qué componente renderizar según el estado (mejorado para mejor navegación)
   const renderCurrentView = () => {
